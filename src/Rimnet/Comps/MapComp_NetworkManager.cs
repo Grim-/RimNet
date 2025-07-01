@@ -9,9 +9,6 @@ namespace RimNet
     public class MapComp_NetworkManager : MapComponent
     {
         protected List<RimNet> ActiveNetworks = new List<RimNet>();
-
-
-
         protected int uniqueNodeIDPrefix = 0;
 
         public MapComp_NetworkManager(Map map) : base(map)
@@ -55,31 +52,14 @@ namespace RimNet
             }
         }
 
-        public void RegisterNode(Comp_NetworkNode node)
+        public bool TryAddNetwork(RimNet rimNet)
         {
-            if (node?.parent?.Map == null)
-                return;
-            if (node.ConnectedNetwork == null)
+            if (ActiveNetworks.Any(x=> x.ID == rimNet.ID))
             {
-                RimNet rimworldNetwork = GetOrRegisterNetwork(GetNextNetworkID());
-                if (rimworldNetwork != null)
-                {
-                    rimworldNetwork.RegisterNode(node);
-                }
+                return false;
             }
-        }
-
-        public void UnregisterNode(Comp_NetworkNode node)
-        {
-            if (node?.parent?.Map == null)
-                return;
-            if (node.ConnectedNetwork == null)
-                return;
-            RimNet rimworldNetwork = GetOrRegisterNetwork(node.ConnectedNetwork.ID);
-            if (rimworldNetwork != null)
-            {
-                rimworldNetwork.UnregisterNode(node);
-            }
+            ActiveNetworks.Add(rimNet);
+            return true;
         }
 
         public void RemoveNetwork(string networkID)
@@ -90,23 +70,23 @@ namespace RimNet
             }
         }
 
-        public void BroadcastMessage(Comp_NetworkNode sender, NetworkMessage message)
-        {
-            if (sender?.parent?.Map == null)
-                return;
-            sender.ConnectedNetwork.BroadcastMessage(sender, message);
-        }
+        //public void BroadcastMessage(Comp_NetworkNode sender, NetworkMessage message)
+        //{
+        //    if (sender?.parent?.Map == null)
+        //        return;
+        //    sender.ConnectedNetwork.BroadcastMessage(sender, message);
+        //}
 
-        public void SendMessage(Comp_NetworkNode sender, string targetNodeID, NetworkMessage message)
-        {
-            if (sender?.parent?.Map == null)
-                return;
-            RimNet rimworldNetwork = GetOrRegisterNetwork(sender.ConnectedNetwork.ID);
-            if (rimworldNetwork != null)
-            {
-                rimworldNetwork.SendMessage(sender, targetNodeID, message);
-            }
-        }
+        //public void SendMessage(Comp_NetworkNode sender, string targetNodeID, NetworkMessage message)
+        //{
+        //    if (sender?.parent?.Map == null)
+        //        return;
+        //    RimNet rimworldNetwork = GetOrRegisterNetwork(sender.ConnectedNetwork.ID);
+        //    if (rimworldNetwork != null)
+        //    {
+        //        rimworldNetwork.SendMessage(sender, targetNodeID, message);
+        //    }
+        //}
         public string GetUniqueNodeID()
         {
             this.uniqueNodeIDPrefix++;

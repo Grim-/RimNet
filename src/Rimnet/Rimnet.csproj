@@ -69,8 +69,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comps\CompProperties_NetworkServer.cs" />
+    <Compile Include="Comps\NetworkConnectionMaker.cs" />
     <Compile Include="Comps\NetworkMessageEventArgs.cs" />
     <Compile Include="Comps\NetworkStatusEventArgs.cs" />
+    <Compile Include="Comps\PlaceWorker_Data.cs" />
+    <Compile Include="Comps\RimNetDefOf.cs" />
     <Compile Include="UI\Modules\Module_CompPowerPlant.cs" />
     <Compile Include="UI\Modules\Module_CompPowerTransmitter.cs" />
     <Compile Include="UI\Widgets\ButtonWidget.cs" />
@@ -101,8 +105,6 @@
     <Compile Include="UI\Windows\Window_NetworkView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="NewFolder1\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

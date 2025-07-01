@@ -9,7 +9,7 @@ namespace RimNet
     public class CompProperties_NetworkNode : CompProperties
     {
         public float defaultRange = 50f;
-        public List<string> moduleTypes = new List<string>(); // Can be set in XML
+        public List<string> moduleTypes = new List<string>();
 
         public CompProperties_NetworkNode()
         {
@@ -17,18 +17,16 @@ namespace RimNet
         }
     }
 
-    public class Comp_NetworkNode : ThingComp, ILoadReferenceable, IExposable
+    public class Comp_NetworkNode : ThingComp, ILoadReferenceable
     {
         public CompProperties_NetworkNode Props => (CompProperties_NetworkNode)props;
         private float range = 50f;
         protected MapComp_NetworkManager NetworkRouter => MapComp_NetworkManager.GetNetworkManager(this.parent.Map);
-        public RimNet _ConnectedNetwork = null;
+        protected RimNet _ConnectedNetwork = null;
 
-        // Module management
         private List<Type> allowedModuleTypes = new List<Type>();
         private List<NetworkUIModule> cachedModules = null;
 
-        // Events
         public event EventHandler<NetworkMessageEventArgs> MessageSent;
         public event EventHandler<NetworkMessageEventArgs> MessageReceived;
         public event EventHandler<NetworkStatusEventArgs> StatusChanged;
@@ -53,8 +51,6 @@ namespace RimNet
             set => nodeID = value;
         }
 
-        public bool IsConnectedToAnyNetwork => ConnectedNetwork != null;
-
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
             base.PostSpawnSetup(respawningAfterLoad);
@@ -65,7 +61,77 @@ namespace RimNet
             }
 
             SetupModules();
-            NetworkRouter.RegisterNode(this);
+            TryJoinNetwork();
+        }
+
+        public override void PostDeSpawn(Map previousMap)
+        {
+            base.PostDeSpawn(previousMap);
+            NetworkConnectionMaker.DisconnectFromNetwork(this);
+        }
+
+        public override void CompTickLong()
+        {
+            base.CompTickLong();
+
+            var currentServer = NetworkConnectionMaker.FindServerViaCables(this);
+
+            if (currentServer == null && ConnectedNetwork != null)
+            {
+                TryJoinNetwork();
+            }
+            else if (currentServer != null && ConnectedNetwork != currentServer.HostedNetwork)
+            {
+                TryJoinNetwork();
+            }
+            else if (currentServer != null && ConnectedNetwork == null)
+            {
+                TryJoinNetwork();
+            }
+        }
+
+        protected virtual void TryJoinNetwork()
+        {
+            var foundServer = NetworkConnectionMaker.FindServerViaCables(this);
+
+            if (foundServer != null)
+            {
+                if (ConnectedNetwork != foundServer.HostedNetwork)
+                {
+                    if (ConnectedNetwork != null)
+                    {
+                        ConnectedNetwork.UnregisterNode(this);
+                    }
+                    foundServer.ConnectNode(this);
+                }
+            }
+            else if (ConnectedNetwork != null)
+            {
+                ConnectedNetwork.UnregisterNode(this);
+            }
+        }
+
+        public void JoinNetwork(RimNet network)
+        {
+            _ConnectedNetwork = network;
+            Log.Message($"{this.parent.Label} joined {this._ConnectedNetwork.ID} network.");
+        }
+
+        public void LeaveNetwork()
+        {
+            _ConnectedNetwork = null;
+        }
+
+        public bool CanTransmit()
+        {
+            var power = parent.TryGetComp<CompPowerTrader>();
+            return (power == null || power.PowerOn) && IsConnectedToServer(out _);
+        }
+
+        public bool CanReceive()
+        {
+            var power = parent.TryGetComp<CompPowerTrader>();
+            return (power == null || power.PowerOn) && IsConnectedToServer(out _);
         }
 
         private void SetupModules()
@@ -83,18 +149,16 @@ namespace RimNet
                     }
                 }
             }
-
-            cachedModules = null; // Clear cache
+            cachedModules = null;
         }
-
 
         public bool CanConnect(out string failReason)
         {
             failReason = string.Empty;
 
-            if (ConnectedNetwork == null)
+            if (!IsConnectedToServer(out _))
             {
-                failReason = "No network";
+                failReason = "No server connection";
                 return false;
             }
 
@@ -110,6 +174,12 @@ namespace RimNet
             }
 
             return true;
+        }
+
+        public virtual bool IsConnectedToServer(out Comp_NetworkServer foundServer)
+        {
+            foundServer = NetworkConnectionMaker.FindServerViaCables(this);
+            return foundServer != null;
         }
 
         public List<NetworkUIModule> GetUIModules()
@@ -136,67 +206,6 @@ namespace RimNet
             return allowedModuleTypes.Contains(typeof(T));
         }
 
-        public override void PostDeSpawn(Map previousMap)
-        {
-            base.PostDeSpawn(previousMap);
-            NetworkRouter.UnregisterNode(this);
-        }
-
-        public void JoinNetwork(RimNet network)
-        {
-            bool wasConnected = IsConnectedToAnyNetwork;
-            _ConnectedNetwork = network;
-
-            if (!wasConnected && IsConnectedToAnyNetwork)
-            {
-                StatusChanged?.Invoke(this, new NetworkStatusEventArgs { Node = this, IsOnline = true });
-            }
-        }
-
-        public void LeaveNetwork()
-        {
-            bool wasConnected = IsConnectedToAnyNetwork;
-            _ConnectedNetwork = null;
-
-            if (wasConnected && !IsConnectedToAnyNetwork)
-            {
-                StatusChanged?.Invoke(this, new NetworkStatusEventArgs { Node = this, IsOnline = false });
-            }
-        }
-
-        public void SendMessage(string targetNodeID)
-        {
-            if (!CanTransmit())
-                return;
-
-            var message = new NetworkMessage(NodeID, ConnectedNetwork);
-
-            var targetNode = ConnectedNetwork?.NetworkNodes.FirstOrDefault(n => n.NodeID == targetNodeID);
-            if (targetNode != null)
-            {
-                MessageSent?.Invoke(this, new NetworkMessageEventArgs
-                {
-                    Sender = this,
-                    Receiver = targetNode,
-                    Message = message
-                });
-            }
-
-            NetworkRouter.SendMessage(this, targetNodeID, message);
-        }
-
-        public bool CanTransmit()
-        {
-            var power = parent.TryGetComp<CompPowerTrader>();
-            return (power == null || power.PowerOn) && ConnectedNetwork != null;
-        }
-
-        public bool CanReceive()
-        {
-            var power = parent.TryGetComp<CompPowerTrader>();
-            return (power == null || power.PowerOn) && ConnectedNetwork != null;
-        }
-
         public void OnMessageReceived(NetworkMessage message)
         {
             MoteMaker.ThrowText(this.parent.DrawPos, this.parent.Map, $"Received network message {message}");
@@ -213,9 +222,42 @@ namespace RimNet
             }
         }
 
+        public override IEnumerable<Gizmo> CompGetGizmosExtra()
+        {
+            yield return new Command_Action()
+            {
+                defaultLabel = "force connect",
+                defaultDesc = "force connect",
+                action = () =>
+                {
+                    NetworkConnectionMaker.TryConnectToAnyNetwork(this);
+                }
+            };
+
+            yield return new Command_Action()
+            {
+                defaultLabel = "Debug Network",
+                defaultDesc = "Show network debug info",
+                action = () =>
+                {
+                    var server = NetworkConnectionMaker.FindServerViaCables(this);
+                    Log.Message($"Node {this.NodeID}:");
+                    Log.Message($"  - Connected to network: {ConnectedNetwork?.ID ?? "None"}");
+                    Log.Message($"  - Server found: {server?.NodeID ?? "None"}");
+                    if (server?.HostedNetwork != null)
+                    {
+                        Log.Message($"  - Server's network: {server.HostedNetwork.ID}");
+                        Log.Message($"  - Nodes in server's network: {server.HostedNetwork.NetworkNodes.Count}");
+                        Log.Message($"  - Is this node in server's network: {server.HostedNetwork.NetworkNodes.Contains(this)}");
+                    }
+                }
+            };
+        }
+
         public override string CompInspectStringExtra()
         {
-            return base.CompInspectStringExtra() + $"Network status : {(IsConnectedToAnyNetwork ? $"Connected Net ID {ConnectedNetwork.ID}" : "Disconnected")}";
+            string serverStatus = IsConnectedToServer(out var server) ? $"Server: {server.NodeID}" : "No connection";
+            return base.CompInspectStringExtra() + $"{serverStatus}";
         }
 
         public override void PostExposeData()
@@ -234,14 +276,6 @@ namespace RimNet
                 nodeID = NetworkRouter?.GetUniqueNodeID() ?? "NetworkNode_" + Find.UniqueIDsManager.GetNextThingID();
             }
             return nodeID;
-        }
-
-        public void ExposeData()
-        {
-            Scribe_References.Look(ref _ConnectedNetwork, "connectedNetwork");
-            Scribe_Values.Look(ref range, "networkRange", 50f);
-            Scribe_Values.Look(ref nodeID, "nodeID");
-            Scribe_Collections.Look(ref allowedModuleTypes, "allowedModuleTypes", LookMode.Undefined);
         }
     }
 }

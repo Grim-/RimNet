@@ -18,19 +18,12 @@ namespace RimNet
         private readonly List<NodeStatusAnimation> StatusAnimations = new List<NodeStatusAnimation>();
         private readonly List<NodePulseAnimation> PulseAnimations = new List<NodePulseAnimation>();
 
-        private Vector2 NodeBoxSize = new Vector2(60f, 60f);
+        private Vector2 NodeBoxSize = new Vector2(140f, 25f);
         private const float CanvasMargin = 40f;
 
         private const int MessageFadeTicks = 120;
         private const int StatusAnimationTicks = 60;
         private const int PulseAnimationTicks = 30;
-
-        private Color NodeBackground = new Color(0.2f, 0.2f, 0.2f, 0.3f);
-        private Color ActiveConnection = new Color(0, 0.6f, 0, 0.5f);
-        private Color NoActiveConnection = new Color(0.6f, 0, 0, 0.5f);
-        private Color ConnectionWarning = new Color(0.6f, 0.4f, 0, 0.5f);
-        private Color MessageSentColor = new Color(0.3f, 0.8f, 1f, 1f);
-        private Color MessageReceivedColor = new Color(1f, 0.8f, 0.3f, 1f);
 
         private int lastUpdateTick;
 
@@ -43,6 +36,8 @@ namespace RimNet
             closeOnClickedOutside = false;
             preventCameraMotion = false;
             absorbInputAroundWindow = true;
+            drawShadow = false;
+            doWindowBackground = false;
             lastUpdateTick = Find.TickManager.TicksGame;
 
             SubscribeToNetworkEvents();
@@ -50,21 +45,29 @@ namespace RimNet
 
         public override void DoWindowContents(Rect inRect)
         {
+            ExpanseUI.DrawBackground(inRect, ExpanseUI.DarkGray);
+            ExpanseUI.DrawAngularBorder(inRect, ExpanseUI.Blue, 4f, 2f);
+
             if (TargetNetwork?.NetworkNodes == null || TargetNetwork.NetworkNodes.Count == 0)
             {
-                Widgets.Label(inRect, "No network or nodes found.");
+                ExpanseUI.BeginExpanseStyle();
+                GUI.color = ExpanseUI.TextColor;
+                Text.Anchor = TextAnchor.MiddleCenter;
+                Widgets.Label(inRect, "NO NETWORK OR NODES FOUND");
+                Text.Anchor = TextAnchor.UpperLeft;
+                ExpanseUI.EndExpanseStyle();
                 return;
             }
 
-            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape || Event.current.keyCode == KeyCode.Mouse1 && Event.current.type == EventType.MouseDown)
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape || Event.current.button == 1 && Event.current.type == EventType.MouseDown)
             {
                 this.Close();
                 Event.current.Use();
                 return;
             }
 
-
-            Dictionary<Comp_NetworkNode, NodeVisual> nodeVisuals = CalculateNodePositions(inRect);
+            Rect workingRect = inRect.Inset(8f);
+            Dictionary<Comp_NetworkNode, NodeVisual> nodeVisuals = CalculateNodePositions(workingRect);
 
             DrawConnections(nodeVisuals);
             DrawNodes(nodeVisuals);
@@ -101,31 +104,31 @@ namespace RimNet
 
         private void OnNetworkMessageSent(object sender, NetworkMessageEventArgs e)
         {
-            Dictionary<Comp_NetworkNode, NodeVisual> visuals = CalculateNodePositions(windowRect);
+            Dictionary<Comp_NetworkNode, NodeVisual> visuals = CalculateNodePositions(windowRect.Inset(8f));
             if (visuals.ContainsKey(e.Sender) && visuals.ContainsKey(e.Receiver))
             {
                 RecentMessages.Add(new NetworkMessageCache(
                     visuals[e.Sender].Center,
                     visuals[e.Receiver].Center,
                     Find.TickManager.TicksGame,
-                    MessageSentColor
+                    ExpanseUI.Blue
                 ));
-                PulseAnimations.Add(new NodePulseAnimation(e.Sender, Find.TickManager.TicksGame, MessageSentColor));
+                PulseAnimations.Add(new NodePulseAnimation(e.Sender, Find.TickManager.TicksGame, ExpanseUI.Blue));
             }
         }
 
         private void OnNetworkMessageReceived(object sender, NetworkMessageEventArgs e)
         {
-            Dictionary<Comp_NetworkNode, NodeVisual> visuals = CalculateNodePositions(windowRect);
+            Dictionary<Comp_NetworkNode, NodeVisual> visuals = CalculateNodePositions(windowRect.Inset(8f));
             if (visuals.ContainsKey(e.Sender) && visuals.ContainsKey(e.Receiver))
             {
                 RecentMessages.Add(new NetworkMessageCache(
                     visuals[e.Sender].Center,
                     visuals[e.Receiver].Center,
                     Find.TickManager.TicksGame,
-                    MessageReceivedColor
+                    ExpanseUI.Orange
                 ));
-                PulseAnimations.Add(new NodePulseAnimation(e.Receiver, Find.TickManager.TicksGame, MessageReceivedColor));
+                PulseAnimations.Add(new NodePulseAnimation(e.Receiver, Find.TickManager.TicksGame, ExpanseUI.Orange));
             }
         }
 
@@ -136,9 +139,14 @@ namespace RimNet
                 StatusAnimations.Add(new NodeStatusAnimation(e.Node, Find.TickManager.TicksGame, e.IsOnline));
                 if (!e.IsOnline)
                 {
-                    PulseAnimations.Add(new NodePulseAnimation(e.Node, Find.TickManager.TicksGame, Color.red));
+                    PulseAnimations.Add(new NodePulseAnimation(e.Node, Find.TickManager.TicksGame, ExpanseUI.Red));
                 }
             }
+        }
+
+        private bool IsServerNode(Comp_NetworkNode node)
+        {
+            return node.parent.TryGetComp<Comp_NetworkServer>() != null;
         }
 
         private Dictionary<Comp_NetworkNode, NodeVisual> CalculateNodePositions(Rect inRect)
@@ -154,7 +162,7 @@ namespace RimNet
                 Comp_NetworkNode node = TargetNetwork.NetworkNodes[i];
 
                 float angle = i * angleStep;
-                float radius = 100f + 35f * Mathf.Sqrt(i);
+                float radius = IsServerNode(node) ? 50f : 100f + 35f * Mathf.Sqrt(i);
                 Vector2 offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
 
                 Vector2 nodeCenter = center + offset;
@@ -168,7 +176,8 @@ namespace RimNet
                 nodeVisuals[node] = new NodeVisual
                 {
                     Center = nodeCenter,
-                    Rect = nodeRect
+                    Rect = nodeRect,
+                    IsServer = IsServerNode(node)
                 };
             }
 
@@ -182,50 +191,62 @@ namespace RimNet
                 return;
             }
 
-            for (int i = 0; i < TargetNetwork.NetworkNodes.Count; i++)
+            var servers = TargetNetwork.NetworkNodes.Where(IsServerNode).ToList();
+            var clients = TargetNetwork.NetworkNodes.Where(n => !IsServerNode(n)).ToList();
+
+            foreach (Comp_NetworkNode client in clients)
             {
-                Comp_NetworkNode nodeA = TargetNetwork.NetworkNodes[i];
-                if (!visuals.TryGetValue(nodeA, out NodeVisual visualA)) 
+                if (!visuals.TryGetValue(client, out NodeVisual clientVisual))
                     continue;
 
-                for (int j = i + 1; j < TargetNetwork.NetworkNodes.Count; j++)
+                foreach (Comp_NetworkNode server in servers)
                 {
-                    Comp_NetworkNode nodeB = TargetNetwork.NetworkNodes[j];
-                    if (!visuals.TryGetValue(nodeB, out NodeVisual visualB)) 
+                    if (!visuals.TryGetValue(server, out NodeVisual serverVisual))
                         continue;
 
-                    Vector2 start = visualA.Center;
-                    Vector2 end = visualB.Center;
+                    bool clientIsConnectedToTargetNet = (client.ConnectedNetwork == TargetNetwork);
+                    bool serverIsConnectedToTargetNet = (server.ConnectedNetwork == TargetNetwork);
 
-                    Color connectionColor = NoActiveConnection; 
+                    string clientFailReason, serverFailReason;
+                    bool clientIsOperational = client.CanConnect(out clientFailReason);
+                    bool serverIsOperational = server.CanConnect(out serverFailReason);
 
-                    bool aIsConnectedToTargetNet = (nodeA.ConnectedNetwork == TargetNetwork);
-                    bool bIsConnectedToTargetNet = (nodeB.ConnectedNetwork == TargetNetwork);
+                    Color connectionColor = ExpanseUI.Red;
 
-                    string aFailReason, bFailReason;
-                    bool aIsOperational = nodeA.CanConnect(out aFailReason);
-                    bool bIsOperational = nodeB.CanConnect(out bFailReason);
-
-                    if (aIsConnectedToTargetNet && bIsConnectedToTargetNet)
+                    if (clientIsConnectedToTargetNet && serverIsConnectedToTargetNet)
                     {
-                        if (aIsOperational && bIsOperational)
+                        if (clientIsOperational && serverIsOperational)
                         {
-                            connectionColor = ActiveConnection;
+                            connectionColor = ExpanseUI.Green;
                         }
                         else
                         {
-                            connectionColor = ConnectionWarning; 
+                            connectionColor = ExpanseUI.Orange;
                         }
                     }
-                    else
-                    {
-                        connectionColor = NoActiveConnection; 
-                    }
 
-                    // Draw the line between the nodes
-                    Widgets.DrawLine(start, end, connectionColor, 1f);
+                    DrawDualChannelConnection(clientVisual.Center, serverVisual.Center, connectionColor);
                 }
             }
+        }
+
+        private void DrawDualChannelConnection(Vector2 start, Vector2 end, Color baseColor)
+        {
+            Vector2 direction = (end - start).normalized;
+            Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+
+            float channelOffset = 2f;
+
+            Vector2 sendStart = start + perpendicular * channelOffset;
+            Vector2 sendEnd = end + perpendicular * channelOffset;
+            Vector2 receiveStart = start - perpendicular * channelOffset;
+            Vector2 receiveEnd = end - perpendicular * channelOffset;
+
+            Color sendColor = Color.Lerp(baseColor, ExpanseUI.Blue, 0.7f);
+            Color receiveColor = Color.Lerp(baseColor, ExpanseUI.Orange, 0.7f);
+
+            Widgets.DrawLine(sendStart, sendEnd, sendColor, 1.5f);
+            Widgets.DrawLine(receiveStart, receiveEnd, receiveColor, 1.5f);
         }
 
         private void DrawNodes(Dictionary<Comp_NetworkNode, NodeVisual> visuals)
@@ -234,9 +255,15 @@ namespace RimNet
 
             foreach ((Comp_NetworkNode node, NodeVisual visual) in visuals)
             {
-                Color baseColor = node.IsConnectedToAnyNetwork ? ActiveConnection : NoActiveConnection;
-                Color currentBgColor = NodeBackground;
+                Color baseColor = node.IsConnectedToServer(out Comp_NetworkServer _) ? ExpanseUI.Green : ExpanseUI.Red;
+                Color currentBgColor = ExpanseUI.DarkGray;
                 float currentScale = 1f;
+
+                if (visual.IsServer)
+                {
+                    currentBgColor = new Color(ExpanseUI.Blue.r * 0.3f, ExpanseUI.Blue.g * 0.3f, ExpanseUI.Blue.b * 0.8f, 0.4f);
+                    baseColor = new Color(baseColor.r * 1.2f, baseColor.g * 1.2f, baseColor.b * 0.8f, baseColor.a);
+                }
 
                 var statusAnim = StatusAnimations.FirstOrDefault(a => a.Node == node);
                 if (statusAnim.Node != null)
@@ -246,12 +273,12 @@ namespace RimNet
 
                     if (statusAnim.GoingOnline)
                     {
-                        baseColor = Color.Lerp(NoActiveConnection, ActiveConnection, progress);
+                        baseColor = Color.Lerp(ExpanseUI.Red, ExpanseUI.Green, progress);
                         currentScale = 1f + Mathf.Sin(progress * Mathf.PI) * 0.2f;
                     }
                     else
                     {
-                        baseColor = Color.Lerp(ActiveConnection, NoActiveConnection, progress);
+                        baseColor = Color.Lerp(ExpanseUI.Green, ExpanseUI.Red, progress);
                         currentScale = 1f - Mathf.Sin(progress * Mathf.PI) * 0.1f;
                     }
                 }
@@ -263,36 +290,55 @@ namespace RimNet
                     float progress = Mathf.Clamp01((float)ticksElapsed / PulseAnimationTicks);
 
                     float pulse = Mathf.Sin(progress * Mathf.PI);
-                    currentBgColor = Color.Lerp(NodeBackground, pulseAnim.PulseColor * 0.3f, pulse);
+                    currentBgColor = Color.Lerp(ExpanseUI.DarkGray, pulseAnim.PulseColor * 0.3f, pulse);
                     currentScale *= 1f + pulse * 0.15f;
                 }
 
                 Rect animatedRect = visual.Rect;
-                //if (currentScale != 1f)
-                //{
-                //    float sizeDiff = NodeBoxSize * (currentScale - 1f);
-                //    animatedRect = animatedRect.ExpandedBy(sizeDiff / 2f);
-                //}
+                if (currentScale != 1f)
+                {
+                    Vector2 sizeDiff = NodeBoxSize * (currentScale - 1f);
+                    animatedRect = new Rect(animatedRect);
+                    animatedRect.width = animatedRect.width + sizeDiff.x;
+                    animatedRect.height = animatedRect.height + sizeDiff.y;
+                }
 
                 if (Mouse.IsOver(animatedRect))
                 {
-                    Widgets.DrawHighlight(animatedRect);
+                    GUI.color = new Color(ExpanseUI.Blue.r, ExpanseUI.Blue.g, ExpanseUI.Blue.b, 0.2f);
+                    GUI.DrawTexture(animatedRect, BaseContent.WhiteTex);
+                    GUI.color = Color.white;
                 }
 
-                Widgets.DrawBoxSolidWithOutline(animatedRect, currentBgColor, baseColor);
+                GUI.color = currentBgColor;
+                GUI.DrawTexture(animatedRect, BaseContent.WhiteTex);
+                GUI.color = Color.white;
 
-                Rect innerRect = animatedRect.ContractedBy(2);
-                Widgets.DrawBoxSolidWithOutline(innerRect, Color.clear, Color.white);
+                //ExpanseUI.DrawAngularBorder(animatedRect, baseColor, 3f, 2f);
+
+                Rect innerRect = animatedRect.ContractedBy(4);
+                ExpanseUI.DrawCutAngularPanel(animatedRect, baseColor, 5f);
 
                 if (Widgets.ButtonInvisible(animatedRect))
                 {
                     Find.WindowStack.Add(new Window_NetworkControlPanel(node));
                 }
 
-                Rect iconRect = animatedRect.ContractedBy(4);
-                Widgets.ThingIcon(iconRect, node.parent);
-                TooltipHandler.TipRegion(animatedRect,
-                    $"Node: {node.parent.LabelShort}\nStatus: {(node.IsConnectedToAnyNetwork ? "Connected" : "Disconnected")}");
+                Rect iconRect = animatedRect.ContractedBy(8);
+                //Widgets.ThingIcon(iconRect, node.parent);
+                GUI.color = Color.white;
+                Text.Font = GameFont.Medium;
+                Text.Anchor = TextAnchor.MiddleCenter;
+                Widgets.Label(animatedRect, $"{node.parent.LabelCap}");
+                Text.Font = GameFont.Tiny;
+                Text.Anchor = TextAnchor.UpperLeft;
+                string nodeType = visual.IsServer ? "SERVER" : "CLIENT";
+                string connectionStatus = node.IsConnectedToServer(out Comp_NetworkServer _) ? "CONNECTED" : "DISCONNECTED";
+
+                ExpanseUI.BeginExpanseStyle();
+                string tooltipText = $"{nodeType}: {node.parent.LabelShort.ToUpper()}\nSTATUS: {connectionStatus}";
+                TooltipHandler.TipRegion(animatedRect, tooltipText);
+                ExpanseUI.EndExpanseStyle();
             }
         }
 
@@ -339,6 +385,7 @@ namespace RimNet
         {
             public Vector2 Center;
             public Rect Rect;
+            public bool IsServer;
         }
     }
 }

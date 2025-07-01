@@ -31,6 +31,8 @@ namespace RimNet
                 node.MessageSent += OnNodeMessageSent;
                 node.MessageReceived += OnNodeMessageReceived;
                 node.StatusChanged += OnNodeStatusChanged;
+
+                Log.Message($"Registering {node.parent.Label} to {this.ID} network.");
             }
         }
         public void UnregisterNode(Comp_NetworkNode node)

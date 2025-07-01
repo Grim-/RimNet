@@ -84,7 +84,8 @@ namespace RimNet
             CheckForSizeChanges();
 
 
-            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape || Event.current.keyCode == KeyCode.Mouse1 && Event.current.type == EventType.MouseDown)
+
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape || Event.current.button == 1 && Event.current.type == EventType.MouseDown)
             {
                 this.Close();
                 Event.current.Use();

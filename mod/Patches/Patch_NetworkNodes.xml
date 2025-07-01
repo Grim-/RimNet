@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Heater"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>50</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_CompTempControl</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Turret_Autocannon"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>75</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_Building_Turret</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Battery"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>40</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_CompPowerBattery</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="SolarGenerator"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>60</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_Building_SolarGenerator</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <!-- Add more turret types -->
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Turret_MiniTurret"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>60</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_Building_Turret</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Turret_Sniper"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>100</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_Building_Turret</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <!-- Add coolers -->
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="Cooler"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>50</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_CompTempControl</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <!-- Add other power generation -->
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="GeothermalGenerator"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>80</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_CompPowerPlant</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="WoodFiredGenerator"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>70</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_CompPowerPlant</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="FabricationBench"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>45</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_CompPowerTrader</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="WindTurbine"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>45</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_CompPowerPlant</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="ChemfuelPoweredGenerator"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>45</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_CompPowerPlant</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="PowerSwitch"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>45</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_CompPowerTransmitter</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="HiTechResearchBench"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>45</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_CompPowerTrader</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+  <Operation Class="PatchOperationAdd">
+    <xpath>Defs/ThingDef[defName="BiofuelRefinery"]/comps</xpath>
+    <value>
+      <li Class="RimNet.CompProperties_NetworkNode">
+        <defaultRange>45</defaultRange>
+        <moduleTypes>
+          <li>RimNet.Module_CompPowerTrader</li>
+        </moduleTypes>
+      </li>
+    </value>
+  </Operation>
+
+</Patch>
