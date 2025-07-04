@@ -1,10 +1,12 @@
-﻿using RimWorld;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
 namespace RimNet
 {
+
+
+
     //Holds all the active networks for a map, provides shortcuts to send network messages.
     public class MapComp_NetworkManager : MapComponent
     {

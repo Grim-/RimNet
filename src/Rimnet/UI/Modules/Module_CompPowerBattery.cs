@@ -8,11 +8,7 @@ namespace RimNet
     {
         private CompPowerBattery battery;
 
-        private static readonly Color ExpanseBlue = new Color(0.1f, 0.3f, 0.6f, 1f);
-        private static readonly Color ExpanseOrange = new Color(1f, 0.5f, 0.1f, 1f);
-        private static readonly Color ExpanseGreen = new Color(0.2f, 0.8f, 0.3f, 1f);
-        private static readonly Color ExpanseGray = new Color(0.2f, 0.25f, 0.3f, 1f);
-        private static readonly Color ExpanseText = new Color(0.8f, 0.9f, 1f, 1f);
+
 
         public override bool CanHandleComponent(ThingWithComps thing)
         {
@@ -30,17 +26,17 @@ namespace RimNet
             Color originalColor = GUI.color;
             Color originalBgColor = GUI.backgroundColor;
 
-            GUI.backgroundColor = ExpanseBlue;
-            GUI.Box(rect, "");
-            GUI.backgroundColor = originalBgColor;
+
+            ExpanseUI.DrawBackground(rect);
+
 
             Rect headerRect = new Rect(rect.x + 2, currentY + 2, rect.width - 4, 18);
-            ExpanseUI.DrawAngularPanel(headerRect, ExpanseGray, ExpanseGray.ChangeAlpha(0.3f));
+            ExpanseUI.DrawAngularPanel(headerRect, ExpanseUI.ExpanseGray, ExpanseUI.ExpanseGray.SetAlpha(0.3f));
 
-            GUI.color = ExpanseText;
+            GUI.color = ExpanseUI.ExpanseText;
             Text.Font = GameFont.Tiny;
             Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(new Rect(headerRect.x + 4, headerRect.y, headerRect.width - 8, headerRect.height), "PWR_CELL");
+            ExpanseUI.DrawFontLabel(new Rect(headerRect.x + 4, headerRect.y, headerRect.width - 8, headerRect.height), "PWR_CELL", GameFont.Small);
             Text.Anchor = TextAnchor.UpperLeft;
 
             currentY += 22;
@@ -51,14 +47,14 @@ namespace RimNet
 
             currentY += barHeight + 4;
 
-            GUI.color = ExpanseText;
+            GUI.color = ExpanseUI.ExpanseText;
             Text.Font = GameFont.Tiny;
             string statusText = $"STORED: {battery.StoredEnergy:F0}/{battery.Props.storedEnergyMax:F0} Wd";
-            Widgets.Label(new Rect(rect.x + 6, currentY, rect.width - 12, 16), statusText);
+            ExpanseUI.DrawFontLabel(new Rect(rect.x + 6, currentY, rect.width - 12, 16), statusText, GameFont.Small);
 
             currentY += 16;
             string efficiencyText = $"EFF: {battery.Props.efficiency * 100f:F0}%";
-            Color effColor = battery.Props.efficiency >= 0.8f ? ExpanseGreen : ExpanseOrange;
+            Color effColor = battery.Props.efficiency >= 0.8f ? ExpanseUI.ExpanseGreen : ExpanseUI.ExpanseOrange;
             GUI.color = effColor;
             Widgets.Label(new Rect(rect.x + 6, currentY, rect.width - 12, 16), efficiencyText);
 
@@ -67,7 +63,7 @@ namespace RimNet
             string status = GetBatteryStatus();
             Color statusColor = GetStatusColor();
             GUI.color = statusColor;
-            Widgets.Label(new Rect(rect.x + 6, currentY, rect.width - 12, 16), $"STS: {status}");
+            ExpanseUI.DrawFontLabel(new Rect(rect.x + 6, currentY, rect.width - 12, 16), $"STS: {status}", GameFont.Small);
 
             GUI.color = originalColor;
         }
@@ -77,11 +73,11 @@ namespace RimNet
             GUI.color = new Color(0.1f, 0.1f, 0.15f, 1f);
             GUI.DrawTexture(rect, BaseContent.WhiteTex);
 
-            GUI.color = ExpanseGray;
-            Widgets.DrawLine(new Vector2(rect.x + 2, rect.y), new Vector2(rect.xMax, rect.y), ExpanseGray, 1f);
-            Widgets.DrawLine(new Vector2(rect.xMax, rect.y), new Vector2(rect.xMax - 2, rect.yMax), ExpanseGray, 1f);
-            Widgets.DrawLine(new Vector2(rect.xMax - 2, rect.yMax), new Vector2(rect.x, rect.yMax), ExpanseGray, 1f);
-            Widgets.DrawLine(new Vector2(rect.x, rect.yMax), new Vector2(rect.x + 2, rect.y), ExpanseGray, 1f);
+            GUI.color = ExpanseUI.ExpanseGray;
+            Widgets.DrawLine(new Vector2(rect.x + 2, rect.y), new Vector2(rect.xMax, rect.y), ExpanseUI.ExpanseGray, 1f);
+            Widgets.DrawLine(new Vector2(rect.xMax, rect.y), new Vector2(rect.xMax - 2, rect.yMax), ExpanseUI.ExpanseGray, 1f);
+            Widgets.DrawLine(new Vector2(rect.xMax - 2, rect.yMax), new Vector2(rect.x, rect.yMax), ExpanseUI.ExpanseGray, 1f);
+            Widgets.DrawLine(new Vector2(rect.x, rect.yMax), new Vector2(rect.x + 2, rect.y), ExpanseUI.ExpanseGray, 1f);
 
  
             if (fillPct > 0f)
@@ -96,20 +92,20 @@ namespace RimNet
                 GUI.DrawTexture(glowRect, BaseContent.WhiteTex);
             }
 
-            GUI.color = ExpanseText;
+            GUI.color = ExpanseUI.ExpanseText;
             Text.Font = GameFont.Tiny;
             Text.Anchor = TextAnchor.MiddleCenter;
             string percentText = $"{fillPct * 100f:F0}%";
-            Widgets.Label(rect, percentText);
+            ExpanseUI.DrawFontLabel(rect, percentText, GameFont.Small);
             Text.Anchor = TextAnchor.UpperLeft;
         }
 
         private Color GetBatteryFillColor(float fillPct)
         {
             if (fillPct > 0.6f)
-                return ExpanseGreen;
+                return ExpanseUI.ExpanseGreen;
             else if (fillPct > 0.3f)
-                return ExpanseOrange;
+                return ExpanseUI.ExpanseOrange;
             else
                 return new Color(0.8f, 0.2f, 0.2f, 1f);
         }
@@ -137,9 +133,9 @@ namespace RimNet
                     return new Color(0.8f, 0.2f, 0.2f, 1f);
                 case "EMP_STUN":
                 case "LOW":
-                    return ExpanseOrange;
+                    return ExpanseUI.ExpanseOrange;
                 default:
-                    return ExpanseGreen;
+                    return ExpanseUI.ExpanseGreen;
             }
         }
 

@@ -30,7 +30,7 @@ namespace RimNet
             ExpanseUI.BeginExpanseStyle();
             ExpanseUI.DrawBackground(rect);
 
-            Rect[] sections = ExpanseUI.SplitRectVertical(rect.Inset(2), 18, 16, 16, 16, 16, 16, 20);
+            Rect[] sections = GUIExtensions.SplitRectVertical(rect.Inset(2), 18, 16, 16, 16, 16, 16, 20);
 
             ExpanseUI.DrawHeader(sections[0], "TURRET_SYS");
 
@@ -190,7 +190,7 @@ namespace RimNet
             ExpanseUI.BeginExpanseStyle();
             ExpanseUI.DrawBackground(rect);
 
-            Rect[] sections = ExpanseUI.SplitRectVertical(rect.Inset(2), 18, 16, 16, 16, 16, 16, 20);
+            Rect[] sections = GUIExtensions.SplitRectVertical(rect.Inset(2), 18, 16, 16, 16, 16, 16, 20);
 
             ExpanseUI.DrawHeader(sections[0], "TURRET_SYS");
 

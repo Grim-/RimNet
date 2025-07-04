@@ -10,6 +10,7 @@ namespace RimNet
     {
         public float defaultRange = 50f;
         public List<string> moduleTypes = new List<string>();
+        public string customNetworkLabel = string.Empty;
 
         public CompProperties_NetworkNode()
         {
@@ -34,6 +35,21 @@ namespace RimNet
         public RimNet ConnectedNetwork
         {
             get => _ConnectedNetwork;
+        }
+
+
+
+        public virtual string NodeLabel
+        {
+            get
+            {
+                if (!String.IsNullOrEmpty(Props.customNetworkLabel))
+                {
+                    return Props.customNetworkLabel;
+                }
+
+                return this.parent.LabelShortCap;
+            }
         }
 
         public ThingWithComps ParentThing => parent;
@@ -92,23 +108,24 @@ namespace RimNet
 
         protected virtual void TryJoinNetwork()
         {
-            var foundServer = NetworkConnectionMaker.FindServerViaCables(this);
+            NetworkConnectionMaker.TryConnectToAnyNetwork(this);
+            //var foundServer = NetworkConnectionMaker.FindServerViaCables(this);
 
-            if (foundServer != null)
-            {
-                if (ConnectedNetwork != foundServer.HostedNetwork)
-                {
-                    if (ConnectedNetwork != null)
-                    {
-                        ConnectedNetwork.UnregisterNode(this);
-                    }
-                    foundServer.ConnectNode(this);
-                }
-            }
-            else if (ConnectedNetwork != null)
-            {
-                ConnectedNetwork.UnregisterNode(this);
-            }
+            //if (foundServer != null)
+            //{
+            //    if (ConnectedNetwork != foundServer.HostedNetwork)
+            //    {
+            //        if (ConnectedNetwork != null)
+            //        {
+            //            ConnectedNetwork.UnregisterNode(this);
+            //        }
+            //        foundServer.ConnectNode(this);
+            //    }
+            //}
+            //else if (ConnectedNetwork != null)
+            //{
+            //    ConnectedNetwork.UnregisterNode(this);
+            //}
         }
 
         public void JoinNetwork(RimNet network)

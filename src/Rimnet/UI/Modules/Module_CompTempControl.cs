@@ -23,7 +23,7 @@ namespace RimNet
             ExpanseUI.BeginExpanseStyle();
             ExpanseUI.DrawBackground(rect);
 
-            Rect[] sections = ExpanseUI.SplitRectVertical(rect.Inset(2), 18, 24, 16, 16, 16, 16);
+            Rect[] sections = GUIExtensions.SplitRectVertical(rect.Inset(2), 20, 26, 18, 18, 18, 18);
 
             ExpanseUI.DrawHeader(sections[0], "TEMP_CTRL");
 
@@ -41,7 +41,6 @@ namespace RimNet
                 GetTemperatureColor(currentTemp)
             );
 
-            // Apply target change if clicked
             if (Mathf.Abs(newTarget - tempControl.targetTemperature) > 0.1f)
             {
                 tempControl.targetTemperature = newTarget;

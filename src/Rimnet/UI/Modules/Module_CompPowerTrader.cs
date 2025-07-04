@@ -4,6 +4,7 @@ using Verse;
 
 namespace RimNet
 {
+
     public class Module_CompPowerTrader : NetworkUIModule
     {
         private CompPowerTrader powerTrader;
@@ -30,7 +31,7 @@ namespace RimNet
             ExpanseUI.BeginExpanseStyle();
             ExpanseUI.DrawBackground(rect);
 
-            Rect[] sections = ExpanseUI.SplitRectVertical(rect.Inset(2), 18, 24, 16, 16, 16, 16, 20);
+            Rect[] sections = GUIExtensions.SplitRectVertical(rect.Inset(2), 18, 24, 16, 16, 16, 16, 20);
 
             ExpanseUI.DrawHeader(sections[0], "PWR_TRADER");
 

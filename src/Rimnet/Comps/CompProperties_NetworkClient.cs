@@ -28,7 +28,7 @@ namespace RimNet
                     defaultDesc = "Open the network viewer",
                     action = () =>
                     {
-                        Find.WindowStack.Add(new Window_NetworkView(ConnectedNetwork, this));
+                        Find.WindowStack.Add(new Window_NetworkGridView(ConnectedNetwork, this));
                     }
                 };
             }

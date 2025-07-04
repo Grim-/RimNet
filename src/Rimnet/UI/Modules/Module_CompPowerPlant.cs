@@ -37,11 +37,11 @@ namespace RimNet
 
             if (refuelableComp != null)
             {
-                sections = ExpanseUI.SplitRectVertical(rect.Inset(2), 18, 24, 16, 16, 16, 16, 16);
+                sections = GUIExtensions.SplitRectVertical(rect.Inset(2), 18, 24, 16, 16, 16, 16, 16);
             }
             else
             {
-                sections = ExpanseUI.SplitRectVertical(rect.Inset(2), 18, 16, 16, 16, 16, 16);
+                sections = GUIExtensions.SplitRectVertical(rect.Inset(2), 18, 16, 16, 16, 16, 16);
             }
 
             ExpanseUI.DrawHeader(sections[0], "POWER_GEN");

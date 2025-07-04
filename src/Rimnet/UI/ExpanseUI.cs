@@ -3,16 +3,101 @@ using Verse;
 
 namespace RimNet
 {
+
+    [StaticConstructorOnStartup]
     public static class ExpanseUI
     {
         public static readonly Color Blue = new Color(0.1f, 0.3f, 0.6f, 1f);
         public static readonly Color Orange = new Color(1f, 0.5f, 0.1f, 1f);
-        public static readonly Color Green = new Color(0.2f, 0.8f, 0.3f, 1f);
+        public static readonly Color Green = new Color(0f, 0.839f, 0.039f, 1f);
         public static readonly Color Gray = new Color(0.72f, 0.75f, 0.73f, 1f);
         public static readonly Color DarkGray = new Color(0.1f, 0.1f, 0.15f, 1f);
         public static readonly Color TextColor = new Color(0.8f, 0.9f, 1f, 1f);
         public static readonly Color Red = new Color(0.8f, 0.2f, 0.2f, 1f);
 
+
+        //old
+        public static readonly Color ExpanseBlue = new Color(0.1f, 0.3f, 0.6f, 1f);
+        public static readonly Color ExpanseOrange = new Color(1f, 0.5f, 0.1f, 1f);
+        public static readonly Color ExpanseGreen = new Color(0, 0.839f, 0.039f, 1f);
+        public static readonly Color ExpanseGray = new Color(0.2f, 0.25f, 0.3f, 1f);
+        public static readonly Color ExpanseText = new Color(0.8f, 0.9f, 1f, 1f);
+
+        public static readonly Texture2D UINodeTex = ContentFinder<Texture2D>.Get("UI_Para");
+        public static readonly Texture2D UIBGIcon = ContentFinder<Texture2D>.Get("UI_Starfall");
+        
+
+
+        //private string GetSystemStatus()
+        //{
+        //    if (breakdownableComp != null && breakdownableComp.BrokenDown)
+        //        return "FAULT";
+
+        //    if (refuelableComp != null && !refuelableComp.HasFuel)
+        //        return "NO_FUEL";
+
+        //    if (flickableComp != null && !flickableComp.SwitchIsOn)
+        //        return "OFFLINE";
+
+        //    if (autoPoweredComp != null && !autoPoweredComp.WantsToBeOn)
+        //        return "AUTO_OFF";
+
+        //    if (toxifier != null && !toxifier.CanPolluteNow)
+        //        return "POLLUTION";
+
+        //    if (!powerPlant.PowerOn)
+        //        return "INACTIVE";
+
+        //    if (powerPlant.PowerOutput > 0f)
+        //        return "GENERATING";
+
+        //    return "STANDBY";
+        //}
+        public static Color GetStatusColor(string status)
+        {
+            switch (status.ToUpper())
+            {
+                case "FAULT":
+                case "CRITICAL":
+                case "ERROR":
+                case "OFFLINE":
+                    return Red;
+                case "WARNING":
+                case "LOW":
+                case "DEGRADED":
+                    return Orange;
+                case "NOMINAL":
+                case "ONLINE":
+                case "ACTIVE":
+                case "READY":
+                    return Green;
+                default:
+                    return TextColor;
+            }
+        }
+        public static Mod_RimNet Mod => LoadedModManager.GetMod<Mod_RimNet>();
+
+
+        private static GUIStyle Style = null;
+
+        // might need to cache it?
+        public static void DrawFontLabel(Rect rect, string text, GameFont gameFont, TextAnchor textAnchor = TextAnchor.UpperLeft)
+        {
+            if (Style == null)
+            {
+                Style = new GUIStyle(GUI.skin.label);
+            }
+
+            if (Mod != null)
+            {
+                Mod.LoadFonts();
+                Font font = Mod.Fonts[gameFont];
+                Style.font = font;
+                Style.alignment = textAnchor;
+            }
+           
+            GUI.Label(rect, text, Style);
+        }
 
         public static void DrawCutAngularPanel(Rect rect, Color color, float cutSize = 3f)
         {
@@ -44,10 +129,7 @@ namespace RimNet
             GUI.color = originalColor;
         }
 
-        public static Color ChangeAlpha(this Color color, float newValue)
-        {
-            return new Color(color.r, color.g, color.b, newValue);
-        }
+
 
         public static void DrawAngularPanel(Rect rect, Color fillColor, Color outlineColor, float slantSize = 3f)
         {
@@ -117,7 +199,7 @@ namespace RimNet
                 Text.Font = GameFont.Tiny;
                 Text.Anchor = TextAnchor.MiddleCenter;
                 string percentText = $"{fillPct * 100f:F0}%";
-                Widgets.Label(rect, percentText);
+                ExpanseUI.DrawFontLabel(rect, percentText, GameFont.Small);
                 Text.Anchor = TextAnchor.UpperLeft;
             }
 
@@ -135,65 +217,41 @@ namespace RimNet
             GUI.color = TextColor;
             Text.Font = GameFont.Tiny;
             Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(new Rect(rect.x + 4, rect.y, rect.width - 8, rect.height), label);
+            ExpanseUI.DrawFontLabel(new Rect(rect.x + 4, rect.y, rect.width - 8, rect.height), label, GameFont.Small);
             Text.Anchor = TextAnchor.UpperLeft;
 
             GUI.color = originalColor;
         }
 
-        public static void DrawStatusText(Rect rect, string label, string value, Color valueColor = default)
+        public static void DrawStatusText(Rect rect, string label, string value, Color valueColor = default, GameFont font = GameFont.Tiny, TextAnchor anchor = TextAnchor.MiddleLeft)
         {
             Color originalColor = GUI.color;
 
             if (valueColor == default) valueColor = TextColor;
 
             GUI.color = TextColor;
-            Text.Font = GameFont.Tiny;
-            Text.Anchor = TextAnchor.MiddleLeft;
+            Text.Font = font;
+            Text.Anchor = anchor;
 
             Vector2 labelSize = Text.CalcSize(label);
-            Widgets.Label(new Rect(rect.x, rect.y, labelSize.x, rect.height), label);
+            ExpanseUI.DrawFontLabel(new Rect(rect.x, rect.y, labelSize.x, rect.height), label, GameFont.Small);
 
             GUI.color = valueColor;
-            Widgets.Label(new Rect(rect.x + labelSize.x, rect.y, rect.width - labelSize.x, rect.height), value);
+
+            ExpanseUI.DrawFontLabel(new Rect(rect.x + labelSize.x, rect.y, rect.width - labelSize.x, rect.height), value, GameFont.Small);
 
             Text.Anchor = TextAnchor.UpperLeft;
+            Text.Font = GameFont.Tiny;
             GUI.color = originalColor;
         }
 
         public static void DrawBackground(Rect rect, Color color = default)
         {
-            Color originalColor = GUI.backgroundColor;
-
-            if (color == default) color = Blue;
-
-            GUI.backgroundColor = color;
-            GUI.Box(rect, "");
-            GUI.backgroundColor = originalColor;
+            if (color == default) color = DarkGray;
+            Widgets.DrawBoxSolid(rect, color);
         }
 
-        public static Color GetStatusColor(string status)
-        {
-            switch (status.ToUpper())
-            {
-                case "FAULT":
-                case "CRITICAL":
-                case "ERROR":
-                case "OFFLINE":
-                    return Red;
-                case "WARNING":
-                case "LOW":
-                case "DEGRADED":
-                    return Orange;
-                case "NOMINAL":
-                case "ONLINE":
-                case "ACTIVE":
-                case "READY":
-                    return Green;
-                default:
-                    return TextColor;
-            }
-        }
+ 
 
         public static Color GetPercentageColor(float percentage)
         {
@@ -216,44 +274,6 @@ namespace RimNet
             GUI.color = Color.white;
             Text.Font = GameFont.Small;
             Text.Anchor = TextAnchor.UpperLeft;
-        }
-
-        public static Rect[] SplitRectVertical(Rect rect, params float[] heights)
-        {
-            Rect[] result = new Rect[heights.Length];
-            float currentY = rect.y;
-
-            for (int i = 0; i < heights.Length; i++)
-            {
-                result[i] = new Rect(rect.x, currentY, rect.width, heights[i]);
-                currentY += heights[i];
-            }
-
-            return result;
-        }
-
-        public static Rect[] SplitRectHorizontal(Rect rect, params float[] widths)
-        {
-            Rect[] result = new Rect[widths.Length];
-            float currentX = rect.x;
-
-            for (int i = 0; i < widths.Length; i++)
-            {
-                result[i] = new Rect(currentX, rect.y, widths[i], rect.height);
-                currentX += widths[i];
-            }
-
-            return result;
-        }
-
-        public static Rect Inset(this Rect rect, float inset)
-        {
-            return new Rect(rect.x + inset, rect.y + inset, rect.width - (inset * 2), rect.height - (inset * 2));
-        }
-
-        public static Rect InsetBy(this Rect rect, float left, float top, float right, float bottom)
-        {
-            return new Rect(rect.x + left, rect.y + top, rect.width - left - right, rect.height - top - bottom);
         }
 
         public static float DrawInteractiveProgressBar(Rect rect, float currentValue, float targetValue, float minValue, float maxValue, string label = "", string unit = "", bool showValues = true, Color fillColor = default)
@@ -410,7 +430,7 @@ namespace RimNet
                     }
                 }
 
-                Widgets.Label(rect, displayText);
+                ExpanseUI.DrawFontLabel(rect, displayText, GameFont.Small);
                 Text.Anchor = TextAnchor.UpperLeft;
             }
 
@@ -504,7 +524,7 @@ namespace RimNet
                     }
                 }
 
-                Widgets.Label(rect, displayText);
+                DrawFontLabel(rect, displayText, GameFont.Small, TextAnchor.MiddleCenter);
                 Text.Anchor = TextAnchor.UpperLeft;
             }
 
@@ -575,7 +595,7 @@ namespace RimNet
             return newValue;
         }
 
-        public static bool DrawButton(Rect rect, string label, Color buttonColor = default, bool enabled = true, float cutSize = 3f, GameFont font = GameFont.Tiny)
+        public static bool DrawButton(Rect rect, string label, Color buttonColor = default, bool enabled = true, float cutSize = 3f, GameFont font = GameFont.Tiny, TextAnchor alignment = TextAnchor.MiddleCenter)
         {
             Color originalColor = GUI.color;
             bool clicked = false;
@@ -620,9 +640,9 @@ namespace RimNet
             Color textColor = enabled ? TextColor : new Color(TextColor.r * 0.6f, TextColor.g * 0.6f, TextColor.b * 0.6f, TextColor.a);
             GUI.color = textColor;
             Text.Font = font;
-            Text.Anchor = TextAnchor.MiddleCenter;
+            Text.Anchor = alignment;
 
-            Widgets.Label(rect, label);
+            ExpanseUI.DrawFontLabel(rect, label, GameFont.Small, alignment);
             Text.Anchor = TextAnchor.UpperLeft;
 
             if (mouseOver && enabled && Event.current.type == EventType.MouseDown && Event.current.button == 0)
@@ -634,9 +654,7 @@ namespace RimNet
             GUI.color = originalColor;
             return clicked;
         }
-
-        public static bool DrawIconButton(Rect rect, Texture2D icon, Color buttonColor = default, bool enabled = true,
-            float cutSize = 3f, string tooltip = "")
+        public static bool DrawIconButton(Rect rect, Texture2D icon, Color buttonColor = default, bool enabled = true, float cutSize = 3f, string tooltip = "")
         {
             Color originalColor = GUI.color;
             bool clicked = false;
@@ -704,6 +722,4 @@ namespace RimNet
             return clicked;
         }
     }
-
-
 }

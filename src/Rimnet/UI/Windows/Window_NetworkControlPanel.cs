@@ -21,7 +21,7 @@ namespace RimNet
         private const float SCROLL_BAR_WIDTH = 20f;
         private const float TOTAL_CONTENT_BOTTOM_PADDING = 8f;
 
-        private const float BASE_MODULE_HEIGHT = 150f;
+        private const float BASE_MODULE_HEIGHT = 170f;
         private const float HEADER_HEIGHT = 35f;
         private const float MIN_WINDOW_HEIGHT = 200f;
         private const float MAX_WINDOW_HEIGHT = 800f;
@@ -203,7 +203,7 @@ namespace RimNet
         {
             ExpanseUI.BeginExpanseStyle();
 
-            Rect[] headerSections = ExpanseUI.SplitRectVertical(rect, HEADER_SECTION_ONE_HEIGHT, HEADER_SECTION_TWO_HEIGHT);
+            Rect[] headerSections = GUIExtensions.SplitRectVertical(rect, HEADER_SECTION_ONE_HEIGHT, HEADER_SECTION_TWO_HEIGHT);
 
             ExpanseUI.DrawHeader(headerSections[0], "NETWORK_TERMINAL");
 
@@ -220,7 +220,7 @@ namespace RimNet
                 ExpanseUI.BeginExpanseStyle();
                 GUI.color = ExpanseUI.Gray;
                 Text.Anchor = TextAnchor.MiddleCenter;
-                Widgets.Label(rect, "NO_MODULES_AVAILABLE");
+                ExpanseUI.DrawFontLabel(rect, "NO_MODULES_AVAILABLE", GameFont.Medium);
                 Text.Anchor = TextAnchor.UpperLeft;
                 ExpanseUI.EndExpanseStyle();
                 return;
@@ -260,7 +260,7 @@ namespace RimNet
             GUI.color = new Color(FRAME_BACKGROUND_RED, FRAME_BACKGROUND_GREEN, FRAME_BACKGROUND_BLUE, FRAME_BACKGROUND_ALPHA);
             GUI.DrawTexture(rect, BaseContent.WhiteTex);
 
-            ExpanseUI.DrawAngularBorder(rect, ExpanseUI.Gray, MODULE_BORDER_WIDTH, MODULE_BORDER_CORNER_RADIUS);
+            ExpanseUI.DrawAngularBorder(rect, ExpanseUI.Gray, MODULE_BORDER_WIDTH, 0.3f);
 
             GUI.color = new Color(ExpanseUI.Blue.r, ExpanseUI.Blue.g, ExpanseUI.Blue.b, MODULE_HIGHLIGHT_ALPHA);
             GUI.DrawTexture(rect.Inset(MODULE_BORDER_INSET), BaseContent.WhiteTex);

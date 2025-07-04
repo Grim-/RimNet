@@ -25,7 +25,7 @@ namespace RimNet
             ExpanseUI.BeginExpanseStyle();
             ExpanseUI.DrawBackground(rect);
 
-            Rect[] sections = ExpanseUI.SplitRectVertical(rect.Inset(2), 18, 18, 16, 16, 16, 16, 16);
+            Rect[] sections = GUIExtensions.SplitRectVertical(rect.Inset(2), 18, 18, 16, 16, 16, 16, 16);
 
             ExpanseUI.DrawHeader(sections[0], "PWR_TRANS");
 
