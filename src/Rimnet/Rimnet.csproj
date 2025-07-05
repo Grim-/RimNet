@@ -81,18 +81,29 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Comps\CompProperties_NetworkServer.cs" />
+    <Compile Include="DataNet\CompProperties_SignalTerminal.cs" />
+    <Compile Include="DataNet\Sensors\CompProperties_BuildingSpawner.cs" />
+    <Compile Include="DataNet\Sensors\CompProperties_SensorDaylight.cs" />
     <Compile Include="DataNet\CompProperties_SignalConduit.cs" />
-    <Compile Include="DataNet\CompProperties_SignalGate.cs" />
+    <Compile Include="DataNet\Logic\CompProperties_SignalGate.cs" />
     <Compile Include="DataNet\CompProperties_SignalNode.cs" />
     <Compile Include="DataNet\CompProperties_SignalReciever.cs" />
-    <Compile Include="DataNet\CompProperties_SignalSource.cs" />
+    <Compile Include="DataNet\Sensors\CompProperties_SignalSensor.cs" />
+    <Compile Include="DataNet\Sensors\CompProperties_SignalSensorPressurePlate.cs" />
+    <Compile Include="DataNet\Sensors\CompProperties_SignalSource.cs" />
     <Compile Include="DataNet\CompProperties_SignalSplitter.cs" />
-    <Compile Include="DataNet\CompProperties_SwitchSignal.cs" />
+    <Compile Include="DataNet\Sensors\CompProperties_SwitchSignal.cs" />
+    <Compile Include="DataNet\Comp_SignalTransmitter.cs" />
+    <Compile Include="DataNet\Sensors\ITileGroupedSignalNode.cs" />
+    <Compile Include="DataNet\Sensors\SignalNodeTileGroup.cs" />
+    <Compile Include="DataNet\Sensors\SignalNodeTileGroupExtensions.cs" />
     <Compile Include="DataNet\Signal.cs" />
     <Compile Include="DataNet\SignalConnectionMaker.cs" />
     <Compile Include="DataNet\SignalManager.cs" />
+    <Compile Include="DataNet\SignalNetwork.cs" />
     <Compile Include="DataNet\SignalPort.cs" />
     <Compile Include="DataNet\SignalPortType.cs" />
+    <Compile Include="DataNet\SpatialNodeData.cs" />
     <Compile Include="Mod_RimNet.cs" />
     <Compile Include="UI\GUIExtensions.cs" />
     <Compile Include="UI\Modules\Module_CompFlickable.cs" />

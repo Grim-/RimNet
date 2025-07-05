@@ -1,6 +1,7 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 
 namespace RimNet
@@ -17,11 +18,29 @@ namespace RimNet
 
     public class Comp_SignalNode : ThingComp
     {
-        public List<SignalPort> ConnectionPorts = new List<SignalPort>();
-        public List<Comp_SignalNode> ParentNodes = new List<Comp_SignalNode>();
-        public List<Comp_SignalNode> ChildNodes = new List<Comp_SignalNode>();
+        protected List<SignalPort> ConnectionPorts = new List<SignalPort>();
+
+
+        public List<SignalPort> AllPorts => ConnectionPorts.ToList();
+        public List<SignalPort> AllConnectedPorts => ConnectionPorts.Where(x=> x.HasConnectTarget).ToList();
+        public List<SignalPort> AllOutPorts => ConnectionPorts.Where(x=> x.Type == SignalPortType.OUT).ToList();
+
+        public List<SignalPort> AllInPorts => ConnectionPorts.Where(x => x.Type == SignalPortType.IN).ToList();
 
         public CompProperties_SignalNode NodeProps => (CompProperties_SignalNode)props;
+        public List<Comp_SignalNode> ConnectedParents => GetConnectedPorts(SignalPortType.IN).Select(p => p.ConnectedNode).ToList();
+        public List<Comp_SignalNode> ConnectedChildren => GetConnectedPorts(SignalPortType.OUT).Select(p => p.ConnectedNode).ToList();
+        public List<Comp_SignalNode> EnabledConnectedChildren => GetConnectedPorts(SignalPortType.OUT).Where(x=> x.Enabled).Select(p => p.ConnectedNode).ToList();
+
+        public virtual bool IsPassiveNode => false;
+
+        public virtual bool ExcludeFromNetworkDiscovery => false;
+
+        public virtual int GetConnectionPriority(Comp_SignalNode otherNode)
+        {
+            return 1;
+        }
+
 
         public override void PostSpawnSetup(bool respawningAfterLoad)
         {
@@ -29,60 +48,130 @@ namespace RimNet
             if (!respawningAfterLoad)
             {
                 SetupDefaultPorts();
-                SignalConnectionMaker.RecursivelyConnectForward(this);
             }
+
+            SignalConnectionMaker.AutoConnectAllOnMap(this.parent.Map);
+
+            var signalManager = this.parent.Map?.GetComponent<SignalManager>();
+            signalManager?.MarkNetworksDirty();
         }
 
         public override void PostDeSpawn(Map map)
         {
             base.PostDeSpawn(map);
 
-            if (ParentNodes.Count > 0)
+
+            foreach (var item in ConnectedParents)
             {
-                foreach (var parent in ParentNodes.ToArray())
-                {
-                    DisconnectParent(parent);
-                }   
+                item.DisconnectFromChild(this);
             }
 
-            if (ChildNodes.Count > 0)
+            foreach (var item in ConnectedChildren)
             {
-                foreach (var child in ChildNodes.ToArray())
-                {
-                    DisconnectChild(child);
-                }
+                item.DisconnectFromParent(this);
             }
+
+            var signalManager = map?.GetComponent<SignalManager>();
+            signalManager?.MarkNetworksDirty();
         }
 
         protected virtual void SetupDefaultPorts()
         {
             ConnectionPorts = new List<SignalPort>();
-            ConnectionPorts.Add(new SignalPort(SignalPortType.OUT, IntVec3.Zero));
-            ConnectionPorts.Add(new SignalPort(SignalPortType.IN, IntVec3.Zero));
+            ConnectionPorts.Add(new SignalPort(this, SignalPortType.OUT, IntVec3.Zero));
+            ConnectionPorts.Add(new SignalPort(this, SignalPortType.IN, IntVec3.Zero));
         }
 
         public virtual bool MakeConnection(SignalPort myPort, Comp_SignalNode otherNode, SignalPort otherPort, out string reason)
         {
             reason = string.Empty;
-            ConnectChild(otherNode);
-            otherNode.ConnectParent(this);
 
+            myPort.Connect(otherNode);
+            otherPort.Connect(this);
+            var signalManager = this.parent.Map?.GetComponent<SignalManager>();
+            signalManager?.MarkNetworksDirty();
             return true;
         }
 
-        public virtual bool VerifyConnection(SignalPort myPort, Comp_SignalNode otherNode, SignalPort otherPort, out string cantConnectReason, bool ignoreConnectionChecks = false)
+        public virtual void Propagate(Signal signal, HashSet<Comp_SignalNode> visited = null)
+        {
+            if (visited == null)
+            {
+                visited = new HashSet<Comp_SignalNode>();
+            }
+
+            if (visited.Contains(this))
+                return;
+
+            visited.Add(this);
+
+            //Log.Message($"-- {this.parent.Label} recieved signal");
+            OnSignalRecieved(signal);
+
+            foreach (var child in EnabledConnectedChildren)
+            {
+                //Log.Message($"    -- >> {child.parent.Label}");
+                child.Propagate(signal, visited);
+            }
+        }
+        public virtual void SendSignal(Signal signal)
+        {
+            var signalManager = this.parent.Map?.GetComponent<SignalManager>();
+            if (signalManager != null)
+            {
+                signalManager.SendSignal(signal, this);
+            }
+            else
+            {
+                var visited = new HashSet<Comp_SignalNode>();
+                Propagate(signal, visited);
+            }
+        }
+
+
+
+
+        public virtual void OnSignalRecieved(Signal signal)
+        {
+           // MoteMaker.ThrowText(this.parent.DrawPos, this.parent.Map, $"Signal recieved!", 3);
+        }
+
+        public virtual bool IsSignalTerminal()
+        {
+            return ConnectedChildren.Count == 0;
+        }
+
+        public virtual bool CanConnectTo(SignalPort myPort, Comp_SignalNode otherNode, SignalPort otherPort, out string cantConnectReason, bool ignoreConnectionChecks = false)
         {
             cantConnectReason = string.Empty;
-
-            if (myPort == null || otherNode == null || otherPort == null)
+            if (myPort == null)
             {
-                cantConnectReason = "self port, other node other nodes port is null";
+                cantConnectReason = $"cannot connect to {otherNode.parent.Label} port on source node is null";
                 return false;
             }
 
-            if (myPort.Type != SignalPortType.OUT || otherPort.Type != SignalPortType.IN)
+            if (otherNode == null)
             {
-                cantConnectReason = "Incompatible port type";
+                cantConnectReason = $"cannot connect target node is null";
+                return false;
+            }
+
+            if (otherPort == null)
+            {
+                cantConnectReason = $"cannot connect target node port is null";
+                return false;
+            }
+
+
+            if (myPort.Type == SignalPortType.OUT && otherPort.Type != SignalPortType.IN)
+            {
+                cantConnectReason = "Source port is an OUT port, and the target port is not an IN port.";
+                return false;
+            }
+
+            if (myPort.Type == SignalPortType.IN && otherPort.Type != SignalPortType.OUT)
+            {
+                cantConnectReason = "Source port is an IN port, and the target port is not an OUT port.";
                 return false;
             }
 
@@ -92,8 +181,14 @@ namespace RimNet
                 return false;
             }
 
+            if (IsAlreadyConnected(otherNode))
+            {
+                cantConnectReason = "target node is already connected";
+                return false;
+            }
 
-            if (myPort.ConnectedNode != null)
+
+            if (myPort.HasConnectTarget)
             {
                 cantConnectReason = "Source node already has connection";
                 return false;
@@ -101,30 +196,11 @@ namespace RimNet
 
             if (!ignoreConnectionChecks)
             {
-                if (otherPort.ConnectedNode != null)
+                if (otherPort.HasConnectTarget)
                 {
                     cantConnectReason = "Target node already has connection";
                     return false;
                 }
-            }
-
-
-            if (ParentNodes.Contains(otherNode))
-            {
-                cantConnectReason = "Target node is already a parent node";
-                return false;
-            }
-
-            if (ChildNodes.Contains(otherNode))
-            {
-                cantConnectReason = "Target node is already a child node";
-                return false;
-            }
-
-            if (this == otherNode)
-            {
-                cantConnectReason = "Cant connect to self";
-                return false;
             }
 
             if (IsNodeDescendantOf(otherNode))
@@ -157,55 +233,95 @@ namespace RimNet
             return ConnectionPorts.Any(x => x.ConnectedNode == otherNode);
         }
 
-        public Comp_SignalNode GetNodeInDirection(IntVec3 direction)
+        public virtual void ConnectToParent(Comp_SignalNode Other)
         {
-            IntVec3 cell = parent.Position + direction.ClampMagnitude(1);
-            return GetNodeAt(cell);
+            if (!TryGetFreeConnectionPort(SignalPortType.IN, out SignalPort port))
+            {
+                Log.Message($"Cant connect to {Other.parent.Label} {this.parent.Label} has no available IN signal ports");
+ 
+                return;
+            }
+            port.Connect(Other);
         }
 
-        public virtual void ConnectParent(Comp_SignalNode Other)
+        public virtual void DisconnectFromParent(Comp_SignalNode Other)
         {
-            if (!TryGetConnectionPort(SignalPortType.IN, out SignalPort port))
+            if (!TryGetConnectionPortForNode(Other, out SignalPort port))
             {
                 Log.Message($"Cant connect to {Other.parent.Label} {this.parent.Label} has no available IN signal ports");
                 //cant connect no free IN nodes
                 return;
             }
 
-            if (!ParentNodes.Contains(Other))
-            {
-                ParentNodes.Add(Other);
-                port.Connect(Other);
-            }
-        }
-        public virtual void DisconnectParent(Comp_SignalNode Other)
-        {
-            if (ParentNodes.Contains(Other))
-            {
-                ParentNodes.Remove(Other);
-                Other.DisconnectChild(this);
-            }
+            port.Disconnect();
+            var signalManager = this.parent.Map?.GetComponent<SignalManager>();
+            signalManager?.MarkNetworksDirty();
         }
 
-        public virtual void ConnectChild(Comp_SignalNode Other)
+        public virtual void ConnectToChild(Comp_SignalNode Other)
         {
-            if (!TryGetConnectionPort(SignalPortType.OUT, out SignalPort port))
+            if (!TryGetFreeConnectionPort(SignalPortType.OUT, out SignalPort port))
             {
                 Log.Message($"Cant connect to {Other.parent.Label} {this.parent.Label} has no available OUT signal ports");
                 //cant connect no free IN nodes
                 return;
             }
-            if (!ChildNodes.Contains(Other))
+
+            port.Connect(Other);
+        }
+
+        public virtual void DisconnectFromChild(Comp_SignalNode Other)
+        {
+            if (!TryGetConnectionPortForNode(Other, out SignalPort port))
             {
-                ChildNodes.Add(Other);
-                port.Connect(Other);
+                Log.Message($"Cannot find");
+                return;
             }
+            port.Disconnect();
+            var signalManager = this.parent.Map?.GetComponent<SignalManager>();
+            signalManager?.MarkNetworksDirty();
+        }
+        public HashSet<SpatialNodeData> GetCardinalNodes()
+        {
+            HashSet<SpatialNodeData> foundNodes = new HashSet<SpatialNodeData>();
+
+            Map map = this.parent.Map;
+
+            foreach (var cell in GenAdjFast.AdjacentCellsCardinal(this.parent.Position))
+            {
+                if (!cell.InBounds(map))
+                {
+                    continue;
+                }
+
+                Comp_SignalNode signalNode = GetNodeAt(cell);
+                if (signalNode != null)
+                {
+                    IntVec3 directionToNode = (signalNode.parent.Position - this.parent.Position).ClampMagnitude(1);
+                    foundNodes.Add(new SpatialNodeData(signalNode, directionToNode, Rot4.FromIntVec3(directionToNode)));
+                    break;
+                }
+            }
+            return foundNodes;
+        }
+
+
+        public bool TryGetFreeConnectionPort(SignalPortType signalPortType, out SignalPort foundPort)
+        {
+            foundPort = null;
+            if (HasFreeConnectionPort(signalPortType))
+            {
+                foundPort = GetFreeConnectionPort(signalPortType);
+                return true;
+            }
+
+            return false;
         }
 
         public bool TryGetConnectionPort(SignalPortType signalPortType, out SignalPort foundPort)
         {
             foundPort = null;
-            if (HasFreeConnectionPort(signalPortType))
+            if (HasConnectionPort(signalPortType))
             {
                 foundPort = GetConnectionPort(signalPortType);
                 return true;
@@ -214,6 +330,23 @@ namespace RimNet
             return false;
         }
 
+        public bool TryGetConnectionPortForNode(Comp_SignalNode node, out SignalPort foundPort)
+        {
+            foundPort = null;
+            if (ConnectionPorts.Any(x=> x.ConnectedNode == node))
+            {
+                foundPort = ConnectionPorts.FirstOrDefault(x=> x.ConnectedNode == node);
+                return true;
+            }
+
+            return false;
+        }
+
+
+        public SignalPort GetFreeConnectionPort(SignalPortType signalPortType)
+        {
+            return ConnectionPorts.FirstOrDefault(x => x.Type == signalPortType && !x.HasConnectTarget);
+        }
         public SignalPort GetConnectionPort(SignalPortType signalPortType)
         {
             return ConnectionPorts.FirstOrDefault(x => x.Type == signalPortType);
@@ -223,18 +356,16 @@ namespace RimNet
         {
             return ConnectionPorts.Any(x => x.Type == signalPortType);
         }
-        public virtual void DisconnectChild(Comp_SignalNode Other)
+        public bool HasConnectionPort(SignalPortType signalPortType)
         {
-            if (ChildNodes.Contains(Other))
-            {
-                ChildNodes.Remove(Other);
-                Other.DisconnectParent(this);
-            }
+            return ConnectionPorts.Any(x => x.Type == signalPortType);
         }
+
+
 
         public bool IsNodeDescendantOf(Comp_SignalNode target)
         {
-            foreach (var child in ChildNodes)
+            foreach (var child in ConnectedChildren)
             {
                 if (child == target || child.IsNodeDescendantOf(target))
                     return true;
@@ -242,45 +373,14 @@ namespace RimNet
             return false;
         }
 
-        public virtual void Propagate(Signal signal, HashSet<Comp_SignalNode> visited = null)
-        {
-            if (visited == null)
-            {
-                visited = new HashSet<Comp_SignalNode>();
-            }
-
-            if (visited.Contains(this))
-                return;
-
-            visited.Add(this);
-
-            Log.Message($"-- {this.parent.Label} recieved signal");
-            OnSignalRecieved(signal);
-
-            foreach (var child in ChildNodes)
-            {
-                Log.Message($"    -- >> {child.parent.Label}");
-                child.Propagate(signal, visited);
-            }
-        }
-
-        public virtual void OnSignalRecieved(Signal signal)
-        {
-            MoteMaker.ThrowText(this.parent.DrawPos, this.parent.Map, $"Signal recieved!", 3);
-        }
-
-
         public virtual List<SignalPort> GetUnconnectedPorts(SignalPortType signalPortType)
         {
             return ConnectionPorts.Where(x => x.Type == signalPortType && x.ConnectedNode == null).ToList();
         }
-
-
         public virtual List<SignalPort> GetConnectedPorts(SignalPortType signalPortType)
         {
             return ConnectionPorts.Where(x => x.Type == signalPortType && x.ConnectedNode != null).ToList();
         }
-
         public List<SignalPort> GetPorts(SignalPortType signalPortType)
         {
             return ConnectionPorts.Where(x => x.Type == signalPortType).ToList();
@@ -290,36 +390,64 @@ namespace RimNet
         {
             base.PostDrawExtraSelectionOverlays();
 
-            if (ChildNodes != null)
+            if (ConnectedChildren != null && ConnectedChildren.Count > 0)
             {
                 GenDraw.DrawCircleOutline(this.parent.DrawPos, 0.5f, SimpleColor.Green);
-                foreach (var c in ChildNodes)
+
+                foreach (var child in ConnectedChildren)
                 {
-                    GenDraw.DrawCircleOutline(c.parent.DrawPos, 0.5f, SimpleColor.Red);
-                    GenDraw.DrawLineBetween(this.parent.DrawPos, c.parent.DrawPos);
+                    if (child == null) continue;
+
+                    var childPort = child.GetConnectedPorts(SignalPortType.IN)
+                        .FirstOrDefault(p => p.ConnectedNode == this);
+                    var isEnabled = childPort != null && childPort.Enabled;
+
+                    var color = isEnabled ? SimpleColor.Green : SimpleColor.Red;
+
+                    GenDraw.DrawCircleOutline(child.parent.DrawPos, 0.5f, color);
+
+                    DrawSignalFlowLine(this.parent.DrawPos, child.parent.DrawPos, color);
                 }
             }
         }
+        public virtual bool IsSplitterNode()
+        {
+            return false;
+        }
+        private void DrawSignalFlowLine(Vector3 start, Vector3 end, SimpleColor color)
+        {
+            var midPoint = (start + end) * 0.5f;
+            var direction = (end - start).normalized;
 
+            GenDraw.DrawLineBetween(start, end, color);
 
+            var arrowSize = 0.15f;
+            var arrowAngle = 30f;
+
+            var perpendicular = Vector3.Cross(direction, Vector3.up);
+            var arrowLeft = Quaternion.AngleAxis(arrowAngle, Vector3.up) * -direction * arrowSize;
+            var arrowRight = Quaternion.AngleAxis(-arrowAngle, Vector3.up) * -direction * arrowSize;
+
+            GenDraw.DrawLineBetween(midPoint, midPoint + arrowLeft, color);
+            GenDraw.DrawLineBetween(midPoint, midPoint + arrowRight, color);
+        }
 
         public override string CompInspectStringExtra()
         {
-            string baseString = base.CompInspectStringExtra();
-
-            if (ParentNodes != null)
+            string baseString = base.CompInspectStringExtra() ?? "";
+            if (ConnectedParents != null)
             {
-                foreach (var parentNode in ParentNodes)
+                foreach (var parentNode in ConnectedParents)
                 {
                     if (parentNode != null)
                     {
                         baseString += $"Parent : {parentNode.parent.Label}\r\n";
-                    }              
+                    }
                 }
             }
-            if (ChildNodes != null)
+            if (ConnectedChildren != null)
             {
-                foreach (var childNode in ChildNodes)
+                foreach (var childNode in ConnectedChildren)
                 {
                     if (childNode != null)
                     {
@@ -330,44 +458,12 @@ namespace RimNet
             return baseString.TrimEndNewlines();
         }
 
-
-        protected List<ThingWithComps> ParentThings = new List<ThingWithComps>();
-        protected List<ThingWithComps> ChildThings = new List<ThingWithComps>();
-
         public override void PostExposeData()
         {
             base.PostExposeData();
-
-
-            ParentThings = ParentNodes.Select(x => x.parent).ToList();
-            ChildThings = ChildNodes.Select(x => x.parent).ToList();
-
-
-            Scribe_Collections.Look(ref ParentThings, "parentThings", LookMode.Reference);
-            Scribe_Collections.Look(ref ChildThings, "childThings", LookMode.Reference);
-
-            if (Scribe.mode == LoadSaveMode.PostLoadInit)
-            {
-                foreach (var p in ParentThings)
-                {
-                    Comp_SignalNode _SignalNode = p.TryGetComp<Comp_SignalNode>();
-                    if (_SignalNode != null)
-                    {
-                        ConnectParent(_SignalNode);
-                    }
-                }
-
-                foreach (var c in ChildThings)
-                {
-                    Comp_SignalNode _SignalNode = c.TryGetComp<Comp_SignalNode>();
-                    if (_SignalNode != null)
-                    {
-                        ConnectChild(_SignalNode);
-                    }
-                }    
-            }
-
             Scribe_Collections.Look(ref ConnectionPorts, "connectionPorts", LookMode.Deep);
         }
     }
+
+
 }

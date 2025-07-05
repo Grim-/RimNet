@@ -1,5 +1,6 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
+using System.Linq;
 using Verse;
 
 namespace RimNet
@@ -17,17 +18,27 @@ namespace RimNet
         protected override void SetupDefaultPorts()
         {
             ConnectionPorts = new List<SignalPort>();
-            ConnectionPorts.Add(new SignalPort(SignalPortType.IN, IntVec3.Zero));
+            ConnectionPorts.Add(new SignalPort(this, SignalPortType.IN, IntVec3.Zero));
+            ConnectionPorts.Add(new SignalPort(this, SignalPortType.OUT, IntVec3.Zero));
         }
 
         public override void OnSignalRecieved(Signal signal)
         {
             base.OnSignalRecieved(signal);
 
-            if (this.parent.TryGetComp(out CompFlickable flickable))
+            if (TryGetConnectionPort(SignalPortType.OUT, out SignalPort foundPort))
             {
-                flickable.DoFlick();
+                if (foundPort.HasConnectTarget)
+                {
+                    if (foundPort.ConnectedNode.parent.TryGetComp(out CompFlickable flickable))
+                    {
+                        flickable.DoFlick();
+                    }
+                }
             }
         }
     }
+
+
+
 }
