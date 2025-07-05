@@ -8,9 +8,12 @@ namespace RimNet
     public class SignalManager : MapComponent
     {
         private List<SignalNetwork> networks = new List<SignalNetwork>();
-        private bool networksDirty = true;
+        private bool rebuildRequested = true; // Start true to build once on first tick
         private int signalProcessTick = 0;
         private int signalProcessInterval = 2;
+
+        private bool isProcessingSignals => networks.Sum(x => x.ActiveSignals.Count) > 0;
+
 
         private static readonly Dictionary<Rot4, int> DirectionPriority = new Dictionary<Rot4, int>
         {
@@ -28,31 +31,34 @@ namespace RimNet
         {
             base.MapComponentTick();
 
-            if (networksDirty)
-            {
-                RebuildNetworks();
-                // Don't set networksDirty = false here, it's done inside RebuildNetworks now
-            }
-
             signalProcessTick++;
             if (signalProcessTick >= signalProcessInterval)
             {
                 TickSignals();
                 signalProcessTick = 0;
             }
+
+            if (rebuildRequested && !isProcessingSignals)
+            {
+                RebuildNetworks();
+                rebuildRequested = false;
+            }
         }
 
-        public void MarkNetworksDirty() => networksDirty = true;
+        public void MarkNetworksDirty()
+        {
+            rebuildRequested = true;
+        }
 
         public void TickSignals()
         {
-            foreach (var network in networks)
+            foreach (var network in networks.ToArray())
             {
                 network.AdvanceSignals();
             }
         }
 
-        private void RebuildNetworks()
+        public void RebuildNetworks()
         {
             networks.Clear();
 
@@ -72,6 +78,7 @@ namespace RimNet
                 if (!visited.Contains(node))
                 {
                     var network = new SignalNetwork();
+                    network.networkID = $"network {Rand.Range(1, 100)}";
                     network.DiscoverNetwork(node, visited);
                     if (network.HasNodes)
                     {
@@ -81,7 +88,7 @@ namespace RimNet
             }
 
             // IMPORTANT: Mark networks as clean BEFORE registering passive nodes
-            networksDirty = false;
+            rebuildRequested = false;
 
             // Now register passive nodes with their networks
             foreach (var passiveNode in passiveNodes)
@@ -133,11 +140,11 @@ namespace RimNet
 
         public SignalNetwork GetNetworkFor(Comp_SignalNode node)
         {
-            if (networksDirty)
-            {
-                RebuildNetworks();
-                networksDirty = false;
-            }
+            //if (networksDirty)
+            //{
+            //    RebuildNetworks();
+            //    networksDirty = false;
+            //}
             return networks.FirstOrDefault(network => network.Contains(node));
         }
 

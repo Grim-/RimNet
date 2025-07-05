@@ -47,21 +47,21 @@ namespace RimNet
                 ThingOnTop.DeSpawn(DestroyMode.Vanish);
             }
         }
-        public override bool IsSignalTerminal()
-        {
-            return false;
-        }
+        //public override bool IsSignalTerminal()
+        //{
+        //    return false;
+        //}
 
-        public override int GetConnectionPriority(Comp_SignalNode otherNode)
-        {
-            //perfer conduits with no children ie leaf conduits
-            if (otherNode is Comp_SignalConduit conduit && conduit.ConnectedChildren.Count == 0)
-            {
-                return 30;
-            }
+        //public override int GetConnectionPriority(Comp_SignalNode otherNode)
+        //{
+        //    //perfer conduits with no children ie leaf conduits
+        //    if (otherNode is Comp_SignalConduit conduit && conduit.ConnectedChildren.Count == 0)
+        //    {
+        //        return 30;
+        //    }
 
-            return base.GetConnectionPriority(otherNode);
-        }
+        //    return base.GetConnectionPriority(otherNode);
+        //}
 
         public override void PostDeSpawn(Map map)
         {
@@ -78,6 +78,11 @@ namespace RimNet
                     spawner.Toggle();
                 }
             });
+
+            foreach (var child in ConnectedChildren)
+            {
+                child.OnSignalRecieved(signal);
+            }
         }
 
         public void Toggle()

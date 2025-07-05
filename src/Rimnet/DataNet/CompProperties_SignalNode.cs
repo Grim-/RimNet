@@ -53,6 +53,7 @@ namespace RimNet
             SignalConnectionMaker.AutoConnectAllOnMap(this.parent.Map);
 
             var signalManager = this.parent.Map?.GetComponent<SignalManager>();
+            Log.Message("signal node placed, rebuilding network");
             signalManager?.MarkNetworksDirty();
         }
 
@@ -72,7 +73,8 @@ namespace RimNet
             }
 
             var signalManager = map?.GetComponent<SignalManager>();
-            signalManager?.MarkNetworksDirty();
+            Log.Message("signal node removed, rebuilding network");
+             signalManager?.MarkNetworksDirty();
         }
 
         protected virtual void SetupDefaultPorts()
@@ -88,8 +90,8 @@ namespace RimNet
 
             myPort.Connect(otherNode);
             otherPort.Connect(this);
-            var signalManager = this.parent.Map?.GetComponent<SignalManager>();
-            signalManager?.MarkNetworksDirty();
+            //var signalManager = this.parent.Map?.GetComponent<SignalManager>();
+            //signalManager?.MarkNetworksDirty();
             return true;
         }
 
@@ -254,8 +256,8 @@ namespace RimNet
             }
 
             port.Disconnect();
-            var signalManager = this.parent.Map?.GetComponent<SignalManager>();
-            signalManager?.MarkNetworksDirty();
+            //var signalManager = this.parent.Map?.GetComponent<SignalManager>();
+            //signalManager?.MarkNetworksDirty();
         }
 
         public virtual void ConnectToChild(Comp_SignalNode Other)
@@ -278,8 +280,8 @@ namespace RimNet
                 return;
             }
             port.Disconnect();
-            var signalManager = this.parent.Map?.GetComponent<SignalManager>();
-            signalManager?.MarkNetworksDirty();
+            //var signalManager = this.parent.Map?.GetComponent<SignalManager>();
+            //signalManager?.MarkNetworksDirty();
         }
         public HashSet<SpatialNodeData> GetCardinalNodes()
         {
@@ -453,6 +455,17 @@ namespace RimNet
                     {
                         baseString += $"Child : {childNode.parent.Label}\r\n";
                     }
+                }
+            }
+
+            var signalManager = this.parent.Map?.GetComponent<SignalManager>();
+            if (signalManager != null)
+            {
+               SignalNetwork network = signalManager.GetNetworkFor(this);
+
+                if (network != null)
+                {
+                    baseString += $"Network {network.networkID}";
                 }
             }
             return baseString.TrimEndNewlines();

@@ -8,10 +8,12 @@ namespace RimNet
     /// Represents a signal currently propagating through the network.
     /// It holds the signal data and a list of nodes that are currently processing it.
     /// </summary>
+
     public class ActiveSignal
     {
         public Signal Signal { get; }
         public HashSet<Comp_SignalNode> NodesAtFront { get; set; }
+        public HashSet<Comp_SignalNode> VisitedNodes { get; } = new HashSet<Comp_SignalNode>();
 
         public ActiveSignal(Signal signal, Comp_SignalNode startNode)
         {
@@ -22,10 +24,13 @@ namespace RimNet
 
     public class SignalNetwork
     {
+        public string networkID = "";
+
         private readonly HashSet<Comp_SignalNode> nodes = new HashSet<Comp_SignalNode>();
         // Replaced the old signal queue with a list of ActiveSignal objects.
         private readonly List<ActiveSignal> activeSignals = new List<ActiveSignal>();
 
+        public List<ActiveSignal> ActiveSignals => activeSignals;
         public bool HasNodes => nodes.Count > 0;
 
         /// <summary>
@@ -39,10 +44,7 @@ namespace RimNet
             }
         }
 
-        /// <summary>
-        /// This is the new core logic. It is called every X ticks by the SignalManager.
-        /// It processes the current front of each active signal and then advances the front to the next set of nodes.
-        /// </summary>
+        //#1 doesnt work, fucks up in werd situations like not following the signal path properly through, it cannt be used
         public void AdvanceSignals()
         {
             if (!activeSignals.Any()) return;
@@ -86,6 +88,48 @@ namespace RimNet
             // 4. Clean up finished signals
             activeSignals.RemoveAll(s => signalsToRemove.Contains(s));
         }
+
+
+        //#2 works but isnt using tick base propgation
+        //public void AdvanceSignals()
+        //{
+        //    if (!activeSignals.Any()) return;
+
+        //    var signalsToRemove = new List<ActiveSignal>();
+
+        //    foreach (var activeSignal in activeSignals.ToList())
+        //    {
+        //        var visited = new HashSet<Comp_SignalNode>();
+
+        //        // Depth-first propagation from each node at front
+        //        foreach (var startNode in activeSignal.NodesAtFront)
+        //        {
+        //            PropagateDepthFirst(startNode, activeSignal.Signal, visited);
+        //        }
+
+        //        // Signal is done after one tick of propagation
+        //        signalsToRemove.Add(activeSignal);
+        //    }
+
+        //    activeSignals.RemoveAll(s => signalsToRemove.Contains(s));
+        //}
+
+
+
+        private void PropagateDepthFirst(Comp_SignalNode node, Signal signal, HashSet<Comp_SignalNode> visited)
+        {
+            if (visited.Contains(node) || !nodes.Contains(node))
+                return;
+
+            visited.Add(node);
+            node.OnSignalRecieved(signal);
+
+            foreach (var child in node.EnabledConnectedChildren)
+            {
+                PropagateDepthFirst(child, signal, visited);
+            }
+        }
+
 
         public void DiscoverNetwork(Comp_SignalNode startNode, HashSet<Comp_SignalNode> globalVisited)
         {
