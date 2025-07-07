@@ -3,6 +3,7 @@
     public enum SignalPortType
     {
         IN,
-        OUT
+        OUT,
+        BOTH
     }
 }

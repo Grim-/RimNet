@@ -28,7 +28,7 @@ namespace RimNet
 
             if (hostedNetwork == null)
             {
-                hostedNetwork = new RimNet("Server_" + NodeID);
+                hostedNetwork = new RimNet(this, "Server_" + NodeID);
                 NetworkRouter.TryAddNetwork(hostedNetwork);
             }
 

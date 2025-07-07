@@ -29,7 +29,16 @@ namespace RimNet
             base.PostSpawnSetup(respawningAfterLoad);
             colorableComp = parent.GetComp<CompColorable>();
         }
-
+        protected override void SetupDefaultPorts()
+        {
+            ConnectionPorts = new List<SignalPort>
+            {
+                new SignalPort(this, SignalPortType.BOTH, IntVec3.Zero),
+                new SignalPort(this, SignalPortType.BOTH, IntVec3.Zero),
+                new SignalPort(this, SignalPortType.BOTH, IntVec3.Zero),
+                new SignalPort(this, SignalPortType.BOTH, IntVec3.Zero)
+            };
+        }
         public override int GetConnectionPriority(Comp_SignalNode otherNode)
         {
             return otherNode.IsSignalTerminal() ? -100 : base.GetConnectionPriority(otherNode);
@@ -45,9 +54,9 @@ namespace RimNet
             }
         }
 
-        public override void OnSignalRecieved(Signal signal)
+        public override void OnSignalRecieved(Signal signal, SignalPort receivingPort)
         {
-            base.OnSignalRecieved(signal);
+            base.OnSignalRecieved(signal, receivingPort);
             SetSignalColor();
         }
 

@@ -9,10 +9,10 @@ namespace RimNet
         {
             ConnectionPorts = new List<SignalPort>
             {
-                new SignalPort(this, SignalPortType.IN, IntVec3.Zero),
-                new SignalPort(this, SignalPortType.OUT, IntVec3.Zero),
-                new SignalPort(this, SignalPortType.OUT, IntVec3.Zero),
-                new SignalPort(this, SignalPortType.OUT, IntVec3.Zero)
+                new SignalPort(this, SignalPortType.BOTH, IntVec3.Zero),
+                new SignalPort(this, SignalPortType.BOTH, IntVec3.Zero),
+                new SignalPort(this, SignalPortType.BOTH, IntVec3.Zero),
+                new SignalPort(this, SignalPortType.BOTH, IntVec3.Zero)
             };
         }
 
@@ -28,10 +28,14 @@ namespace RimNet
 
         protected string GetDirectionLabel(IntVec3 direction)
         {
-            if (direction == IntVec3.North) return "North";
-            if (direction == IntVec3.South) return "South";
-            if (direction == IntVec3.East) return "East";
-            if (direction == IntVec3.West) return "West";
+            if (direction == IntVec3.North) 
+                return "North";
+            if (direction == IntVec3.South) 
+                return "South";
+            if (direction == IntVec3.East) 
+                return "East";
+            if (direction == IntVec3.West) 
+                return "West";
             return direction.ToString();
         }
     }

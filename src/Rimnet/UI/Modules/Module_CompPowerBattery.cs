@@ -6,6 +6,7 @@ namespace RimNet
 {
     public class Module_CompPowerBattery : NetworkUIModule
     {
+        private const int Height = 20;
         private CompPowerBattery battery;
 
 
@@ -50,20 +51,20 @@ namespace RimNet
             GUI.color = ExpanseUI.ExpanseText;
             Text.Font = GameFont.Tiny;
             string statusText = $"STORED: {battery.StoredEnergy:F0}/{battery.Props.storedEnergyMax:F0} Wd";
-            ExpanseUI.DrawFontLabel(new Rect(rect.x + 6, currentY, rect.width - 12, 16), statusText, GameFont.Small);
+            ExpanseUI.DrawFontLabel(new Rect(rect.x + 6, currentY, rect.width - 12, Height), statusText, GameFont.Small);
 
-            currentY += 16;
+            currentY += Height;
             string efficiencyText = $"EFF: {battery.Props.efficiency * 100f:F0}%";
             Color effColor = battery.Props.efficiency >= 0.8f ? ExpanseUI.ExpanseGreen : ExpanseUI.ExpanseOrange;
             GUI.color = effColor;
-            Widgets.Label(new Rect(rect.x + 6, currentY, rect.width - 12, 16), efficiencyText);
+            ExpanseUI.DrawFontLabel(new Rect(rect.x + 6, currentY, rect.width - 12, Height), efficiencyText, GameFont.Small);
 
-            currentY += 16;
+            currentY += Height;
 
             string status = GetBatteryStatus();
             Color statusColor = GetStatusColor();
             GUI.color = statusColor;
-            ExpanseUI.DrawFontLabel(new Rect(rect.x + 6, currentY, rect.width - 12, 16), $"STS: {status}", GameFont.Small);
+            ExpanseUI.DrawFontLabel(new Rect(rect.x + 6, currentY, rect.width - 12, Height), $"STS: {status}", GameFont.Small);
 
             GUI.color = originalColor;
         }

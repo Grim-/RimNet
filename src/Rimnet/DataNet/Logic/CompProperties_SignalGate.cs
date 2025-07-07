@@ -1,4 +1,8 @@
-﻿namespace RimNet
+﻿using System.Collections.Generic;
+using System.Linq;
+using Verse;
+
+namespace RimNet
 {
     public class CompProperties_SignalGate : CompProperties_SignalNode
     {
@@ -10,6 +14,11 @@
 
     public class Comp_SignalGate : Comp_SignalNode
     {
-
+        public override void OnSignalRecieved(Signal signal, SignalPort receivingPort)
+        {
+            base.OnSignalRecieved(signal, receivingPort);
+        }
     }
+
+ 
 }

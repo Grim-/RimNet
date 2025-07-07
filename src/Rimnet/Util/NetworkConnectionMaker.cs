@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using RimWorld;
+using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
@@ -8,7 +9,7 @@ namespace RimNet
     {
         public static void ConnectAllNodesToServer(Comp_NetworkServer newServer)
         {
-            foreach (Comp_NetworkNode node in PotentialNodesForServer(newServer))
+            foreach (Comp_NetworkNode node in GetPotentialNodesForServer(newServer))
             {
                 if (node.ConnectedNetwork == null)
                 {
@@ -19,10 +20,9 @@ namespace RimNet
 
         public static void DisconnectAllFromServer(Comp_NetworkServer deadServer, Map map)
         {
-            if (deadServer.HostedNetwork?.NetworkNodes == null)
-                return;
+            var nodesToDisconnect = deadServer.HostedNetwork?.NetworkNodes?.ToList();
+            if (nodesToDisconnect == null) return;
 
-            var nodesToDisconnect = deadServer.HostedNetwork.NetworkNodes.ToList();
             foreach (var node in nodesToDisconnect)
             {
                 node.LeaveNetwork();
@@ -31,15 +31,12 @@ namespace RimNet
 
         public static void TryConnectToAnyNetwork(Comp_NetworkNode node, List<RimNet> disallowedNets = null)
         {
-            if (node.ConnectedNetwork != null)
-                return;
-
-            if (!node.parent.Spawned)
+            if (node.ConnectedNetwork != null || !node.parent.Spawned)
                 return;
 
             var server = FindServerViaCables(node);
-            if (server != null && server.HostedNetwork != null &&
-                (disallowedNets == null || !disallowedNets.Contains(server.HostedNetwork)))
+            if (server?.HostedNetwork != null &&
+                (disallowedNets?.Contains(server.HostedNetwork) != true))
             {
                 server.ConnectNode(node);
             }
@@ -47,8 +44,7 @@ namespace RimNet
 
         public static void DisconnectFromNetwork(Comp_NetworkNode node)
         {
-            if (node.ConnectedNetwork == null)
-                return;
+            if (node.ConnectedNetwork == null) return;
 
             node.ConnectedNetwork.UnregisterNode(node);
             node.LeaveNetwork();
@@ -63,62 +59,43 @@ namespace RimNet
             while (cablesToCheck.Count > 0)
             {
                 var cable = cablesToCheck.Dequeue();
-                if (visitedCells.Contains(cable.Position))
+                if (!visitedCells.Add(cable.Position))
                     continue;
-                visitedCells.Add(cable.Position);
 
-                // Check all cells adjacent to this cable for servers
-                foreach (var adjCell in GenAdjFast.AdjacentCells8Way(cable.Position))
-                {
-                    if (!adjCell.InBounds(node.parent.Map))
-                        continue;
+                var server = FindServerNearCable(cable, node.parent.Map);
+                if (server != null)
+                    return server;
 
-                    // Also check for non-building servers
-                    var things = adjCell.GetThingList(node.parent.Map);
-                    foreach (var thing in things)
-                    {
-                        if (thing is ThingWithComps twc)
-                        {
-                            var serverComp = twc.TryGetComp<Comp_NetworkServer>();
-                            if (serverComp != null)
-                            {
-                                return serverComp;
-                            }
-                        }
-                    }
-
-                    // Add connected cables to the queue
-                    if (!visitedCells.Contains(adjCell))
-                    {
-                        var cables = things.Where(t => t.def == RimNetDefOf.NetworkCable);
-                        foreach (var connectedCable in cables)
-                        {
-                            cablesToCheck.Enqueue(connectedCable);
-                        }
-                    }
-                }
+                EnqueueAdjacentCables(cable, node.parent.Map, cablesToCheck, visitedCells);
             }
 
             return null;
         }
 
+        public static Comp_NetworkServer BestServerForNode(IntVec3 nodePos, Map map, List<RimNet> disallowedNets = null)
+        {
+            var validServers = GetValidServers(map, disallowedNets);
+
+            return validServers
+                .OrderBy(server => (server.parent.Position - nodePos).LengthHorizontalSquared)
+                .FirstOrDefault();
+        }
+
         private static List<Thing> GetAdjacentNetworkCables(Comp_NetworkNode node)
         {
             var cables = new List<Thing>();
+
             foreach (IntVec3 cell in GenAdj.CellsAdjacent8Way(node.parent))
             {
-                if (!cell.InBounds(node.parent.Map)) 
-                    continue; 
+                if (!cell.InBounds(node.parent.Map))
+                    continue;
 
-
-                foreach (Thing t in cell.GetThingList(node.parent.Map))
-                {
-                    if (t.def == RimNetDefOf.NetworkCable)
-                    {
-                        cables.Add(t);
-                    }
-                }
+                cables.AddRange(
+                    cell.GetThingList(node.parent.Map)
+                        .Where(IsNetworkCable)
+                );
             }
+
             return cables;
         }
 
@@ -133,7 +110,7 @@ namespace RimNet
             return false;
         }
 
-        private static IEnumerable<Comp_NetworkNode> PotentialNodesForServer(Comp_NetworkServer server)
+        private static IEnumerable<Comp_NetworkNode> GetPotentialNodesForServer(Comp_NetworkServer server)
         {
             if (!server.parent.Spawned)
             {
@@ -141,43 +118,89 @@ namespace RimNet
                 yield break;
             }
 
-            var allNodes = server.parent.Map.listerThings.AllThings
-                .Where(t => t.TryGetComp<Comp_NetworkNode>() != null)
-                .Select(t => t.TryGetComp<Comp_NetworkNode>())
-                .Where(n => !(n is Comp_NetworkServer) && n.ConnectedNetwork == null);
+            var allNodes = GetAllDisconnectedNodes(server.parent.Map);
 
             foreach (var node in allNodes)
             {
-                var foundServer = FindServerViaCables(node);
-                if (foundServer == server)
+                if (FindServerViaCables(node) == server)
                 {
                     yield return node;
                 }
             }
         }
 
-        public static Comp_NetworkServer BestServerForNode(IntVec3 nodePos, Map map, List<RimNet> disallowedNets = null)
+        private static IEnumerable<Comp_NetworkNode> GetAllDisconnectedNodes(Map map)
         {
-            var allServers = map.listerThings.AllThings
-                .Where(t => t.TryGetComp<Comp_NetworkServer>() != null)
+            return map.listerThings.AllThings
+                .Select(t => t.TryGetComp<Comp_NetworkNode>())
+                .Where(n => n != null &&
+                           !(n is Comp_NetworkServer) &&
+                           n.ConnectedNetwork == null);
+        }
+
+        private static IEnumerable<Comp_NetworkServer> GetValidServers(Map map, List<RimNet> disallowedNets)
+        {
+            return map.listerThings.AllThings
                 .Select(t => t.TryGetComp<Comp_NetworkServer>())
-                .Where(s => s.HostedNetwork != null &&
-                           (disallowedNets == null || !disallowedNets.Contains(s.HostedNetwork)));
+                .Where(s => s?.HostedNetwork != null &&
+                           (disallowedNets?.Contains(s.HostedNetwork) != true));
+        }
 
-            float bestDistance = 999999f;
-            Comp_NetworkServer result = null;
-
-            foreach (var server in allServers)
+        private static Comp_NetworkServer FindServerNearCable(Thing cable, Map map)
+        {
+            foreach (var adjCell in GenAdjFast.AdjacentCells8Way(cable.Position))
             {
-                float distance = (server.parent.Position - nodePos).LengthHorizontalSquared;
-                if (distance < bestDistance)
+                if (!adjCell.InBounds(map))
+                    continue;
+
+                var server = FindServerInCell(adjCell, map);
+                if (server != null)
+                    return server;
+            }
+
+            return null;
+        }
+
+        private static Comp_NetworkServer FindServerInCell(IntVec3 cell, Map map)
+        {
+            var things = cell.GetThingList(map);
+
+            foreach (var thing in things.OfType<ThingWithComps>())
+            {
+                var networkComp = thing.TryGetComp<Comp_NetworkServer>();
+                if (networkComp?.ConnectedNetwork != null)
                 {
-                    bestDistance = distance;
-                    result = server;
+                    return networkComp.ConnectedNetwork.NetworkServer;
+                }
+
+                var serverComp = thing.TryGetComp<Comp_NetworkServer>();
+                if (serverComp != null)
+                {
+                    return serverComp;
                 }
             }
 
-            return result;
+            return null;
+        }
+
+        private static void EnqueueAdjacentCables(Thing cable, Map map, Queue<Thing> cablesToCheck, HashSet<IntVec3> visitedCells)
+        {
+            foreach (var adjCell in GenAdjFast.AdjacentCells8Way(cable.Position))
+            {
+                if (!adjCell.InBounds(map) || visitedCells.Contains(adjCell))
+                    continue;
+
+                var cables = adjCell.GetThingList(map).Where(IsNetworkCable);
+                foreach (var connectedCable in cables)
+                {
+                    cablesToCheck.Enqueue(connectedCable);
+                }
+            }
+        }
+
+        private static bool IsNetworkCable(Thing thing)
+        {
+            return thing.def == ThingDefOf.PowerConduit || thing.def == ThingDefOf.HiddenConduit;
         }
     }
 }

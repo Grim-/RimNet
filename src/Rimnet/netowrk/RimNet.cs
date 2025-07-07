@@ -16,11 +16,16 @@ namespace RimNet
         public event EventHandler<NetworkMessageEventArgs> NetworkMessageSent;
         public event EventHandler<NetworkMessageEventArgs> NetworkMessageReceived;
         public event EventHandler<NetworkStatusEventArgs> NodeStatusChanged;
+
+        public Comp_NetworkServer NetworkServer;
+
         public RimNet() { }
-        public RimNet(string id)
+        public RimNet(Comp_NetworkServer server, string id)
         {
             ID = id;
+            NetworkServer = server;
         }
+
         public void RegisterNode(Comp_NetworkNode node)
         {
             if (!NetworkNodes.Contains(node))

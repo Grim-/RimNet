@@ -5,14 +5,21 @@ namespace RimNet
 {
     public abstract class CompProperties_SignalSensor : CompProperties_SignalSource
     {
-        public int sensorUpdateInterval = 100;  
+
     }
 
     public abstract class Comp_SignalSensor : Comp_SignalSource
     {
         CompProperties_SignalSensor Props => (CompProperties_SignalSensor)props;
 
-        protected bool ShouldInvert = false;
+        public bool ShouldInvert = false;
+
+        public int customUpdateInterval = -1;
+        public string intervalBuffer;
+
+        public virtual int DefaultUpdateInterval => 250;
+
+        public int CurrentUpdateInterval => customUpdateInterval >= 0 ? customUpdateInterval : DefaultUpdateInterval;
 
         public bool Invert
         {
@@ -20,11 +27,23 @@ namespace RimNet
             set => ShouldInvert = value;
         }
 
+        public int CustomUpdateInterval
+        {
+            get => customUpdateInterval;
+            set => customUpdateInterval = value;
+        }
+
+        public string IntervalBuffer
+        {
+            get => intervalBuffer;
+            set => intervalBuffer = value;
+        }
+
+
         public override void Initialize(CompProperties props)
         {
             this.parent.def.tickerType = TickerType.Normal;
             base.Initialize(props);
-
         }
 
         protected override void SetupDefaultPorts()
@@ -39,44 +58,41 @@ namespace RimNet
         {
             base.CompTick();
 
-            if (this.parent.Spawned && this.parent.IsHashIntervalTick(Props.sensorUpdateInterval))
+            if (this.parent.Spawned && this.parent.IsHashIntervalTick(CurrentUpdateInterval))
             {
-                if (DoSensorCheck())
-                {
-                    OnSensorTriggered(1);
-                }
+                CheckSensor();
             }
         }
 
-        public virtual void OnSensorTriggered(float sensorValue)
+        public virtual void CheckSensor()
         {
-            TriggerSignal(sensorValue);
+            float currentValue = GetSensorValue();
+            TriggerSignal(currentValue);
         }
 
+        protected abstract float GetSensorValue();
 
-        protected bool DoSensorCheck()
+        public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
-            if (ShouldInvert)
+            foreach (var gizmo in base.CompGetGizmosExtra())
             {
-                return !CheckSensor();
+                yield return gizmo;
             }
 
-            return CheckSensor();
+            yield return new Gizmo_SensorConfig(this);
         }
 
-        protected abstract bool CheckSensor();
-
-
-        public override bool IsSplitterNode()
+        public override void PostExposeData()
         {
-            return false;
+            base.PostExposeData();
+            Scribe_Values.Look(ref ShouldInvert, "ShouldInvert", false);
+            Scribe_Values.Look(ref customUpdateInterval, "customUpdateInterval", -1);
         }
 
-        public override bool IsSignalTerminal()
+        public override string CompInspectStringExtra()
         {
-            return ConnectedChildren.Count == 0;
+            return base.CompInspectStringExtra() + $"\nSensor Value: {GetSensorValue():F2}" + $"\nUpdate Interval: {CurrentUpdateInterval / 60f:F2}s";
         }
     }
-
 
 }

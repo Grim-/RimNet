@@ -2,6 +2,6 @@
 {
     public interface ITileGroupedSignalNode
     {
-        SignalNodeTileGroup TileGroup { get; }
+        SignalGroup TileGroup { get; }
     }
 }

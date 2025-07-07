@@ -7,13 +7,18 @@ namespace RimNet
         public float Value;
         public int LastChangeTick;
 
-        public Signal(float value, int lastChangeTick)
+        public Comp_SignalNode SignalSource;
+
+        public Signal(Comp_SignalNode source, float value, int lastChangeTick)
         {
-            Value = value;
+            SignalSource = source;
+               Value = value;
             LastChangeTick = lastChangeTick;
         }
-        public Signal(float value)
+
+        public Signal(Comp_SignalNode source, float value)
         {
+            SignalSource = source;
             Value = value;
             LastChangeTick = Find.TickManager.TicksGame;
         }

@@ -24,7 +24,8 @@ namespace RimNet
             var signal = new Signal
             {
                 Value = value,
-                LastChangeTick = Find.TickManager.TicksGame
+                LastChangeTick = Find.TickManager.TicksGame,
+                SignalSource = this
             };
             SendSignal(signal);
         }
@@ -37,6 +38,11 @@ namespace RimNet
 
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
+            foreach (var item in base.CompGetGizmosExtra())
+            {
+                yield return item;
+            }
+
             yield return new Command_Action()
             {
                 defaultLabel = "Send Signal (0)",

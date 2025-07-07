@@ -109,23 +109,6 @@ namespace RimNet
         protected virtual void TryJoinNetwork()
         {
             NetworkConnectionMaker.TryConnectToAnyNetwork(this);
-            //var foundServer = NetworkConnectionMaker.FindServerViaCables(this);
-
-            //if (foundServer != null)
-            //{
-            //    if (ConnectedNetwork != foundServer.HostedNetwork)
-            //    {
-            //        if (ConnectedNetwork != null)
-            //        {
-            //            ConnectedNetwork.UnregisterNode(this);
-            //        }
-            //        foundServer.ConnectNode(this);
-            //    }
-            //}
-            //else if (ConnectedNetwork != null)
-            //{
-            //    ConnectedNetwork.UnregisterNode(this);
-            //}
         }
 
         public void JoinNetwork(RimNet network)
