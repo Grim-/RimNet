@@ -80,7 +80,16 @@
     <Publicize Include="Assembly-CSharp:Verse.RegionGrid.map" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comps\CompProperties_GasEmitter.cs" />
     <Compile Include="Comps\CompProperties_NetworkServer.cs" />
+    <Compile Include="Conveyor\Building_TrackJunction.cs" />
+    <Compile Include="Conveyor\Building_TrackStation.cs" />
+    <Compile Include="Conveyor\Building_TrainTrack.cs" />
+    <Compile Include="Conveyor\HeldItem.cs" />
+    <Compile Include="Conveyor\ThingSpatialData.cs" />
+    <Compile Include="Conveyor\Thing_TrainCar.cs" />
+    <Compile Include="Conveyor\TrackTypeDef.cs" />
+    <Compile Include="Conveyor\TrainTrackNetwork.cs" />
     <Compile Include="DataNet\Sensors\CompProperties_SensorWeather.cs" />
     <Compile Include="DataNet\Gizmos\Gizmo_SensorConfig.cs" />
     <Compile Include="DataNet\Signal\ActiveSignal.cs" />
@@ -105,7 +114,9 @@
     <Compile Include="DataNet\Routing\Comp_SignalTransmitter.cs" />
     <Compile Include="DataNet\Interfaces\ITileGroupedSignalNode.cs" />
     <Compile Include="DataNet\Group\SignalGroup.cs" />
-    <Compile Include="DataNet\Group\SignalNodeTileGroupExtensions.cs" />
+    <Compile Include="Conveyor\Building_Track.cs" />
+    <Compile Include="Conveyor\TrackManager.cs" />
+    <Compile Include="Conveyor\TrackNetwork.cs" />
     <Compile Include="DataNet\Signal\Signal.cs" />
     <Compile Include="DataNet\Signal\SignalConnectionMaker.cs" />
     <Compile Include="DataNet\Signal\SignalManager.cs" />

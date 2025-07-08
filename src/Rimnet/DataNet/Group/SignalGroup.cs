@@ -11,6 +11,20 @@ namespace RimNet
         private Thing ownerThing;
         private List<Comp_SignalNode> connectedNodes = new List<Comp_SignalNode>();
 
+
+        public HashSet<Comp_SignalNode> AllNodes
+        {
+            get
+            {
+                HashSet<Comp_SignalNode> nodes = new HashSet<Comp_SignalNode>();
+                nodes.Add(ownerNode);
+                nodes.AddRange(connectedNodes);
+                return nodes;
+            }
+        }
+
+        public Comp_SignalNode OwnerNode => ownerNode;
+
         public List<Comp_SignalNode> ConnectedNodes => connectedNodes.ToList();
         public int GroupSize => connectedNodes.Count + 1;
 
@@ -28,99 +42,133 @@ namespace RimNet
             ownerNode = owner;
             ownerThing = owner?.parent;
             groupID = groupName;
+            DiscoverGroup(owner);
         }
 
-        public void ConnectToAdjacentTiles()
+
+
+        public void SelectBestOwner()
         {
-            if (ownerNode?.parent?.Spawned != true) 
-                return;
-
-            foreach (var cell in GenAdjFast.AdjacentCellsCardinal(ownerNode.parent.Position))
+            //a node that is connected to something other than other nodes of the same type
+            Comp_SignalNode newBestNode = AllNodes.Where(x => x.AllConnectedPorts.Any(y => y.ConnectedNode.GetType() != ownerNode.GetType())).FirstOrDefault();
+            if (newBestNode != null)
             {
-                if (!cell.InBounds(ownerNode.parent.Map)) 
-                    continue;
+                ownerNode = newBestNode;
+                ownerThing = newBestNode.parent;    
+            }
+        }
 
-                Comp_SignalNode adjacentNode = GetSignalNodeAt(cell);
+        public void OnGroupMemberSelected(Comp_SignalNode member)
+        {
+            foreach (var item in ConnectedNodes)
+            {
+                GenDraw.DrawCircleOutline(item.parent.DrawPos, 1f, SimpleColor.Yellow);
+            }   
+        }
 
-                if (adjacentNode != null && CanJoinGroup(adjacentNode))
+        public bool IsGroupOwner(Comp_SignalNode signalNode)
+        {
+            return ownerNode == signalNode;
+        }
+
+        private void DiscoverGroup(Comp_SignalNode rootNode)
+        {
+            this.connectedNodes.Clear();
+
+            Queue<Comp_SignalNode> queue = new Queue<Comp_SignalNode>();
+
+            HashSet<Comp_SignalNode> visited = new HashSet<Comp_SignalNode>();
+
+            queue.Enqueue(rootNode);
+            visited.Add(rootNode);
+            while (queue.Count > 0)
+            {
+                Comp_SignalNode currentNode = queue.Dequeue();
+
+                if (currentNode != this.ownerNode)
                 {
-                    JoinGroup(adjacentNode);
-                    connectedNodes.Add(adjacentNode);
-                    adjacentNode.GetTileGroup()?.JoinGroup(ownerNode);
+                    this.connectedNodes.Add(currentNode);
+                }
+
+                foreach (var neighborInfo in currentNode.GetCardinalNodes())
+                {
+                    Comp_SignalNode neighborNode = neighborInfo.FoundNode;
+                    if (neighborNode != null && !visited.Contains(neighborNode) && neighborNode.GetType() == this.ownerNode.GetType())
+                    {
+                        visited.Add(neighborNode);
+                        queue.Enqueue(neighborNode);
+                    }
                 }
             }
         }
-        //private void CheckAndMergeAdjacentGroups()
-        //{
-        //    foreach (var cell in GenAdjFast.AdjacentCellsCardinal(this.parent.Position))
-        //    {
-        //        if (!cell.InBounds(this.parent.Map))
-        //            continue;
-
-        //        if (TryGetExistingAdjacentGroup(cell, this.parent.Map, out SignalGroup adjacentGroup) &&
-        //            adjacentGroup != this.tileGroup)
-        //        {
-        //            var nodesToMigrate = new List<Comp_SignalNode>(adjacentGroup.ConnectedNodes);
-
-        //            foreach (var node in nodesToMigrate)
-        //            {
-        //                node.tileGroup = this.tileGroup;
-        //                this.tileGroup.JoinGroup(node);
-        //            }
-        //        }
-        //    }
-        //}
-
-        //private bool TryGetExistingAdjacentGroup(IntVec3 cell, Map map, out SignalGroup tileGroup)
-        //{
-        //    tileGroup = null;
-        //    Comp_SignalNode adjacentNode = GetNodeAt(cell);
-        //    if (adjacentNode != null &&
-        //        adjacentNode.GetType() == this.GetType() &&
-        //        adjacentNode.CanFormTileGroup &&
-        //        adjacentNode.tileGroup != null)
-        //    {
-        //        tileGroup = adjacentNode.tileGroup;
-        //        return true;
-        //    }
-        //    return false;
-        //}
 
         public void DisconnectFromAdjacentTiles()
         {
             foreach (var node in connectedNodes.ToList())
             {
-                node.GetTileGroup()?.LeaveGroup(ownerNode);
+                node.SignalGroup?.LeaveGroup(ownerNode);
             }
             connectedNodes.Clear();
         }
 
         public void JoinGroup(Comp_SignalNode node)
         {
-            if (!connectedNodes.Contains(node))
+            if (connectedNodes.Contains(node) || ownerNode == node)
             {
-                connectedNodes.Add(node);
+                return;
             }
+
+            connectedNodes.Add(node);
+            foreach (var neighborData in node.GetCardinalNodes())
+            {
+                var neighborNode = neighborData.FoundNode;
+                if (neighborNode?.SignalGroup != null && neighborNode.SignalGroup != this)
+                {
+                    MergeGroup(neighborNode.SignalGroup);
+                }
+            }
+
+
+            SelectBestOwner();
+        }
+
+        /// <summary>
+        /// Absorbs all nodes from another group into this one, making this group dominant.
+        /// </summary>
+        public void MergeGroup(SignalGroup otherGroup)
+        {
+            var nodesToMerge = new List<Comp_SignalNode>(otherGroup.ConnectedNodes);
+            nodesToMerge.Add(otherGroup.ownerNode);
+            foreach (var node in nodesToMerge)
+            {
+                node.JoinSignalGroup(this);
+            }
+
+            SelectBestOwner();
         }
 
         public void LeaveGroup(Comp_SignalNode node)
         {
             connectedNodes.Remove(node);
+
+            SelectBestOwner();
         }
 
-        public void SendSignalToGroup(Signal signal, Action<Comp_SignalNode, Signal> action, HashSet<Comp_SignalNode> visited = null)
+        public bool IsPartOfGroup(Comp_SignalNode signalNode)
         {
-            if (visited == null)
-                visited = new HashSet<Comp_SignalNode>();
+            return signalNode == ownerNode || connectedNodes.Contains(signalNode);
+        }
 
-            if (visited.Contains(ownerNode)) 
-                return;
-
-            visited.Add(ownerNode);
-            action(ownerNode, signal);
-            foreach (var node in connectedNodes)
+        public void SendSignalToGroup(Signal signal, Comp_SignalNode sender, Action<Comp_SignalNode, Signal> action)
+        {
+            foreach (var node in AllNodes)
             {
-                node.GetTileGroup()?.SendSignalToGroup(signal, action, visited);
+                if (node == sender)
+                {
+                    continue;
+                }
+
+                action(node, signal);
             }
         }
 
@@ -134,22 +182,6 @@ namespace RimNet
             return false;
         }
 
-        public bool IsPartOfGroup(Comp_SignalNode signalNode)
-        {
-            return connectedNodes.Contains(signalNode);
-        }
-
-        private Comp_SignalNode GetSignalNodeAt(IntVec3 position)
-        {
-            var things = position.GetThingList(ownerNode.parent.Map);
-            foreach (var thing in things)
-            {
-                var node = thing.TryGetComp<Comp_SignalNode>();
-                if (node != null)
-                    return node;
-            }
-            return null;
-        }
 
         public void ExposeData()
         {

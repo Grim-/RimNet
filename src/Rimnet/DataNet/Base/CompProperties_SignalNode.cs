@@ -49,11 +49,11 @@ namespace RimNet
 
         #endregion
 
-        protected SignalGroup tileGroup;
-        public SignalGroup TileGroup => tileGroup;
-        public virtual bool CanFormTileGroup => false;
+        protected SignalGroup signalGroup;
+        public SignalGroup SignalGroup => signalGroup;
+        public virtual bool CanFormSignalGroup => false;
 
-        public virtual bool BelongsToGroup => tileGroup != null && tileGroup.IsPartOfGroup(this) && CanFormTileGroup;
+        public virtual bool BelongsToGroup => signalGroup != null && signalGroup.IsPartOfGroup(this) && CanFormSignalGroup;
 
 
 
@@ -73,79 +73,30 @@ namespace RimNet
             if (!respawningAfterLoad)
             {
                 SetupDefaultPorts();
-
-                if (CanFormTileGroup)
-                {
-                    GetTileGroup()?.ConnectToAdjacentTiles();
-                }
             }
 
+            JoinOrFormSignalGroup();
             // Now it is safe to update connections, because OwnerNode is guaranteed not to be null.
             SignalConnectionMaker.UpdateConnectionsFor(this);
             var signalManager = this.parent.Map?.GetComponent<SignalManager>();
             Log.Message("signal node placed, rebuilding network");
             signalManager?.MarkNetworksDirty();
         }
-
         public override void PostDeSpawn(Map map)
         {
             base.PostDeSpawn(map);
             ClearPorts();
 
-            if (CanFormTileGroup && tileGroup != null)
+            if (CanFormSignalGroup && SignalGroup != null)
             {
-                tileGroup.LeaveGroup(this);
+                SignalGroup.LeaveGroup(this);
             }
 
             var signalManager = map?.GetComponent<SignalManager>();
             Log.Message("signal node removed, rebuilding network");
             signalManager?.MarkNetworksDirty();
         }
-        public virtual void CreatePort(SignalPortType type, IntVec3 offset, string portName, int portIndex, bool showPort = true, bool autoConnectable = true)
-        {
-            ConnectionPorts.Add(new SignalPort(this, type, offset, null, portName, portIndex, showPort, autoConnectable));
-        }
 
-        protected virtual void SetupDefaultPorts()
-        {
-            ConnectionPorts = new List<SignalPort>();
-            CreatePort(SignalPortType.OUT, IntVec3.Zero, "OUT", 0);
-            CreatePort(SignalPortType.IN, IntVec3.Zero, "IN", 0);
-        }
-
-        public virtual void ClearPorts()
-        {
-            foreach (var item in ConnectionPorts.ToArray())
-            {
-                if (item.HasConnectTarget)
-                {
-                    item.Disconnect();
-                }
-            }
-
-            ConnectionPorts.Clear();
-        }
-
-        public void JoinTileGroup(SignalGroup group)
-        {
-            if (tileGroup != null && tileGroup.IsPartOfGroup(this))
-            {
-                tileGroup.LeaveGroup(this);
-            }
-
-            tileGroup = group;
-            tileGroup.JoinGroup(this);
-        }
-
-
-
-        public virtual bool MakeConnection(SignalPort myPort, Comp_SignalNode otherNode, SignalPort otherPort, out string reason)
-        {
-            reason = string.Empty;
-            myPort.Connect(otherPort);
-            otherPort.Connect(myPort);
-            return true;
-        }
 
         public virtual void SendSignal(Signal signal)
         {
@@ -158,26 +109,104 @@ namespace RimNet
 
         public virtual void OnSignalRecieved(Signal signal, SignalPort receivingPort)
         {
-            if (CanFormTileGroup && tileGroup != null)
+            // Only propagate to group if the signal came from outside the group
+            if (SignalGroup != null)
             {
-                var visited = new HashSet<Comp_SignalNode>();
-                tileGroup.SendSignalToGroup(signal, (node, sig) =>
+                SignalGroup.SendSignalToGroup(signal, this, (node, sig) =>
                 {
                     if (node != this)
                     {
-                        node.OnGroupSignalReceived(sig);
+                        node.OnSignalRecieved(signal, receivingPort);
                     }
-                }, visited);
+                });
             }
         }
 
 
-        //Process the signal but don't propagate through the network again
-        protected virtual void OnGroupSignalReceived(Signal signal)
-        {
+        #region Port
 
+        protected virtual void SetupDefaultPorts()
+        {
+            ConnectionPorts = new List<SignalPort>();
+            CreatePort(SignalPortType.OUT, IntVec3.Zero, "OUT", 0);
+            CreatePort(SignalPortType.IN, IntVec3.Zero, "IN", 0);
+        }
+        public virtual void CreatePort(SignalPortType type, IntVec3 offset, string portName, int portIndex, bool showPort = true, bool autoConnectable = true)
+        {
+            ConnectionPorts.Add(new SignalPort(this, type, offset, null, portName, portIndex, showPort, autoConnectable));
+        }
+        public virtual void ClearPorts()
+        {
+            foreach (var item in ConnectionPorts.ToArray())
+            {
+                if (item.HasConnectTarget)
+                {
+                    item.Disconnect();
+                }
+            }
+
+            ConnectionPorts.Clear();
+        }
+        #endregion
+
+
+        #region Signal Group
+
+        private void JoinOrFormSignalGroup()
+        {
+            if (!CanFormSignalGroup)
+            {
+                return;
+            }
+            foreach (var item in GetCardinalNodes())
+            {
+                if (item.FoundNode.CanFormSignalGroup && item.FoundNode.SignalGroup != null && item.FoundNode.SignalGroup.CanJoinGroup(this))
+                {
+                    JoinSignalGroup(item.FoundNode.SignalGroup);
+                    return; 
+                }
+            }
+
+            SignalGroup newGroup = new SignalGroup(this, $"{this.GetType()}");
+            JoinSignalGroup(newGroup);
+        }
+        public void JoinSignalGroup(SignalGroup group)
+        {
+            if (signalGroup != null && signalGroup.IsPartOfGroup(this))
+            {
+                signalGroup.LeaveGroup(this);
+            }
+
+            signalGroup = group;
+            signalGroup.JoinGroup(this);
+            signalGroup.SelectBestOwner();
+            SyncNetWorkToGroupOwner();
         }
 
+        private void SyncNetWorkToGroupOwner()
+        {
+
+            var signalManager = this.parent.Map?.GetComponent<SignalManager>();
+            if (signalManager != null)
+            {
+                if (SignalGroup.OwnerNode != null)
+                {
+                    SignalNetwork ownerNetwork = signalManager.GetNetworkFor(SignalGroup.OwnerNode);
+
+                    if (ownerNetwork != null)
+                    {
+                        SignalNetwork network = signalManager.GetNetworkFor(this);
+
+                        if (network != null)
+                        {
+                            network.TransferTo(this, ownerNetwork);
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion
 
         public virtual bool IsSignalTerminal()
         {
@@ -187,6 +216,20 @@ namespace RimNet
         public virtual bool IsSplitterNode()
         {
             return false;
+        }
+
+
+        #region Connections
+        public virtual bool MakeConnection(SignalPort myPort, Comp_SignalNode otherNode, SignalPort otherPort, out string reason)
+        {
+            reason = string.Empty;
+            myPort.Connect(otherPort);
+            otherPort.Connect(myPort);
+            return true;
+        }
+        public void MakeConnection(SignalPort myPort, SignalPort targetPort)
+        {
+            this.MakeConnection(myPort, targetPort.OwnerNode, targetPort, out _);
         }
 
         public virtual bool CanConnectTo(SignalPort myPort, Comp_SignalNode otherNode, SignalPort otherPort, out string cantConnectReason, bool ignoreConnectionChecks = false)
@@ -228,19 +271,16 @@ namespace RimNet
 
             return true;
         }
-        #region Connections
 
         public virtual int GetConnectionPriority(Comp_SignalNode otherNode)
         {
             return 1;
         }
  
-
         public bool IsAlreadyConnected(Comp_SignalNode otherNode)
         {
             return ConnectionPorts.Any(x => x.ConnectedNode == otherNode);
         }
-
 
         public virtual void DisconnectFromChild(Comp_SignalNode Other)
         {
@@ -289,6 +329,8 @@ namespace RimNet
 
  
         #endregion
+
+
         public virtual IEnumerable<PropagationTarget> GetPropagationTargets()
         {
             foreach (var sendingPort in AllOutPorts.Where(x=> x.Enabled && x.HasConnectTarget))
@@ -302,18 +344,6 @@ namespace RimNet
                     yield return new PropagationTarget(neighborNode, receivingPort);
                 }
             }
-        }
-
-        public SignalGroup GetTileGroup()
-        {
-            if (!CanFormTileGroup)
-                return null;
-
-            if (tileGroup == null)
-            {
-                tileGroup = new SignalGroup(this);
-            }
-            return tileGroup;
         }
 
         public Comp_SignalNode GetNodeAt(IntVec3 position)
@@ -382,7 +412,6 @@ namespace RimNet
         {
             return IsNodeDescendantOf(target, new HashSet<Comp_SignalNode>());
         }
-
         private bool IsNodeDescendantOf(Comp_SignalNode target, HashSet<Comp_SignalNode> visited)
         {
             visited.Add(this);
@@ -405,13 +434,11 @@ namespace RimNet
         }
 
 
-
         protected virtual bool IsValidSelectionTarget(SignalPort sourcePort, SignalPort targetPort, out string notValidSelectionTargetReason)
         {
             notValidSelectionTargetReason = string.Empty;
             return sourcePort.OwnerNode.CanConnectTo(sourcePort, targetPort.OwnerNode, targetPort, out _);
         }
-
         public void ShowSourceSelectionMenu(Func<SignalPort, SignalPort, bool> validator = null)
         {
             var potentialSourcePorts = this.AllUnConnectedPorts
@@ -469,11 +496,6 @@ namespace RimNet
             });
         }
 
-        public void MakeConnection(SignalPort myPort, SignalPort targetPort)
-        {
-            this.MakeConnection(myPort, targetPort.OwnerNode, targetPort, out _);
-        }
-
 
         public override void PostDrawExtraSelectionOverlays()
         {
@@ -481,10 +503,14 @@ namespace RimNet
 
             DrawConnectionLine();
             DrawPortIndicators();
+
+
+            if (SignalGroup != null)
+            {
+                SignalGroup.OnGroupMemberSelected(this);
+            }
         }
  
-
-
         private void DrawConnectionLine()
         {
 
@@ -508,7 +534,6 @@ namespace RimNet
                 }
             }
         }
-
         private void DrawPortIndicators()
         {
             foreach (var port in ConnectionPorts)
@@ -546,7 +571,6 @@ namespace RimNet
                 }
             }
         }
-
         private void DrawSignalFlowLine(Vector3 start, Vector3 end, SimpleColor color)
         {
             var midPoint = (start + end) * 0.5f;
@@ -600,15 +624,13 @@ namespace RimNet
                 }
             }
 
-            if (CanFormTileGroup && tileGroup != null)
+            if (CanFormSignalGroup && SignalGroup != null)
             {
-                baseString += $"Group {tileGroup.GroupLabel}";
+                baseString += $"Group {SignalGroup.GroupLabel} {(SignalGroup.IsGroupOwner(this) ? "Owner" : "Member")}";
             }
 
             return baseString.TrimEndNewlines();
         }
- 
-
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
             foreach (var port in AllPorts)

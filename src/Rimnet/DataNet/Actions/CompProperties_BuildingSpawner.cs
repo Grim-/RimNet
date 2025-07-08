@@ -19,7 +19,7 @@ namespace RimNet
         private Thing ThingOnTop;
         private bool IsSpawned = true;
 
-        public override bool CanFormTileGroup => true;
+        public override bool CanFormSignalGroup => true;
 
         public override void OnSignalRecieved(Signal signal, SignalPort receivingPort)
         {

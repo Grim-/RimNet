@@ -19,6 +19,8 @@ namespace RimNet
         private PressurePlateTriggerMode triggerMode = PressurePlateTriggerMode.ON_STEP;
         private PressurePlateTargetType targetType = PressurePlateTargetType.ANY_PAWN;
 
+        public override bool CanFormSignalGroup => true;
+
         protected override void SetupDefaultPorts()
         {
             ConnectionPorts = new List<SignalPort>();

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
   <ThingDef ParentName="BuildingBase">
-    <defName>Test_NetworkServer</defName>
-    <label>network server</label>
-    <description>A computer core housing a machine persona who can guide a starship through any challenge during a multi-decade starflight.</description>
+    <defName>AirBubble</defName>
+    <label>AirBubbler</label>
+    <description>AirBubble.</description>
     <thingClass>Building</thingClass>
     <graphicData>
-      <texPath>Things/Building/Ship/ShipComputerCore</texPath>
+      <texPath>Things/Building/Ship/ShipSensorCluster</texPath>
       <graphicClass>Graphic_Multi</graphicClass>
       <drawSize>(2,2)</drawSize>
       <shadowData>
-        <volume>(2.76, 0.5, 2.66)</volume>
+        <volume>(1.83, 0.5, 1.73)</volume>
         <offset>(0,0,-0.05)</offset>
       </shadowData>
     </graphicData>
@@ -22,37 +22,28 @@
     <blockLight>true</blockLight>
     <canOverlapZones>false</canOverlapZones>
     <statBases>
-      <WorkToBuild>16000</WorkToBuild>
-      <MaxHitPoints>150</MaxHitPoints>
+      <WorkToBuild>30000</WorkToBuild>
+      <MaxHitPoints>100</MaxHitPoints>
       <Flammability>0</Flammability>
     </statBases>
     <tickerType>Normal</tickerType>
     <size>(2,2)</size>
     <designationCategory>Ship</designationCategory>
     <comps>
-      <li Class="CompProperties_Power">
-        <compClass>CompPowerTransmitter</compClass>
-        <transmitsPower>true</transmitsPower>
-      </li>
-      <li Class="RimNet.CompProperties_NetworkServer">
+      <!-- <li Class="RimNet.CompProperties_OxygenPusher">
+        <oxygenChangePerTick>100</oxygenChangePerTick>
+      </li> -->
+      <li Class="RimNet.CompProperties_OxygenGridProtection">
       </li>
     </comps>
-    <placeWorkers>
-      <li>PlaceWorker_NotUnderRoof</li>
-    </placeWorkers>
-    <building>
-      <destroySound>BuildingDestroyed_Metal_Small</destroySound>
-    </building>
     <costList>
-      <Steel>150</Steel>
-      <ComponentSpacer>4</ComponentSpacer>
-      <Gold>70</Gold>
-      <AIPersonaCore>1</AIPersonaCore>
+      <Steel>140</Steel>
+      <Gold>4</Gold>
+      <ComponentIndustrial>6</ComponentIndustrial>
+      <ComponentSpacer>6</ComponentSpacer>
     </costList>
     <terrainAffordanceNeeded>Heavy</terrainAffordanceNeeded>
-    <designationHotKey>Misc3</designationHotKey>
     <constructionSkillPrerequisite>8</constructionSkillPrerequisite>
   </ThingDef>
-
 
 </Defs>

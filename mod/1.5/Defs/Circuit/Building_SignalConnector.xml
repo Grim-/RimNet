@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
   <ThingDef ParentName="BuildingBase">
-    <defName>NetworkCable</defName>
-    <label>network cable</label>
-    <description>A bundle of electrical cables for moving power around. Can be placed under walls and other buildings.</description>
+    <defName>SignalConnector</defName>
+    <label>Signal Connector</label>
+    <description>place to connect signals.</description>
     <thingClass>Building</thingClass>
     <category>Building</category>
     <graphicData>
@@ -16,11 +16,12 @@
       <damageData>
         <rect>(0,0.35,1,0.3)</rect>
       </damageData>
+      <color>(1,0,0)</color>
     </graphicData>
     <uiIconPath>Things/Building/Linked/PowerConduit_MenuIcon</uiIconPath>
     <uiIconScale>0.7</uiIconScale>
     <building>
-      <isPowerConduit>true</isPowerConduit>
+      <isPowerConduit>false</isPowerConduit>
       <ai_chillDestination>false</ai_chillDestination>
       <isInert>true</isInert>
       <isEdifice>false</isEdifice>
@@ -28,7 +29,7 @@
         <texPath>Things/Building/Linked/PowerConduit_Blueprint_Atlas</texPath>
       </blueprintGraphicData>
     </building>
-    <drawerType>MapMeshOnly</drawerType>
+    <drawerType>MapMeshAndRealTime</drawerType>
     <altitudeLayer>Conduits</altitudeLayer>
     <passability>Standable</passability>
     <leaveResourcesWhenKilled>false</leaveResourcesWhenKilled>
@@ -44,16 +45,19 @@
       <Steel>1</Steel>
     </costList>
     <comps>
+      <li>
+        <compClass>CompColorable</compClass>
+      </li>
+      <li Class="RimNet.CompProperties_SignalConduit">
+      </li>
     </comps>
-    <placeWorkers>
-      <li>RimNet.PlaceWorker_Data</li>
-    </placeWorkers>
+    <tickerType>Normal</tickerType>
     <rotatable>false</rotatable>
     <selectable>true</selectable>
     <neverMultiSelect>true</neverMultiSelect>
     <soundImpactDefault>BulletImpact_Metal</soundImpactDefault>
     <terrainAffordanceNeeded>Light</terrainAffordanceNeeded>
-    <designationCategory>Power</designationCategory>
+    <designationCategory>Data</designationCategory>
     <uiOrder>2000</uiOrder>
     <constructEffect>ConstructMetal</constructEffect>
     <clearBuildingArea>false</clearBuildingArea>
@@ -61,6 +65,8 @@
     <researchPrerequisites>
       <li>Electricity</li>
     </researchPrerequisites>
+    <placeWorkers>
+      <li>RimNet.PlaceWorker_SignalNode</li>
+    </placeWorkers>
   </ThingDef>
-
 </Defs>

@@ -85,7 +85,7 @@ namespace RimNet
 
             foreach (var node in nearbyNodes)
             {
-                if (node.parent.def == checkingDef && node.CanFormTileGroup)
+                if (node.parent.def == checkingDef && node.CanFormSignalGroup)
                 {
                     return AcceptanceReport.WasAccepted;
                 }

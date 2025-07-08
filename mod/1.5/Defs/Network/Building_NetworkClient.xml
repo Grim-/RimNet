@@ -6,14 +6,19 @@
     <description>A computer core housing a machine persona who can guide a starship through any challenge during a multi-decade starflight.</description>
     <thingClass>Building</thingClass>
     <graphicData>
-      <texPath>Things/Building/Ship/ShipComputerCore</texPath>
       <graphicClass>Graphic_Multi</graphicClass>
-      <drawSize>(2,2)</drawSize>
+      <texPath>Things/Building/Misc/AncientTerminal/AncientTerminal</texPath>
+      <damageData>
+        <cornerTL>Damage/Corner</cornerTL>
+        <cornerTR>Damage/Corner</cornerTR>
+        <cornerBL>Damage/Corner</cornerBL>
+        <cornerBR>Damage/Corner</cornerBR>
+      </damageData>
       <shadowData>
-        <volume>(2.76, 0.5, 2.66)</volume>
-        <offset>(0,0,-0.05)</offset>
+        <volume>(0.55, 0.30, 0.40)</volume>
       </shadowData>
     </graphicData>
+    <size>(1,1)</size>
     <rotatable>false</rotatable>
     <altitudeLayer>Building</altitudeLayer>
     <passability>Impassable</passability>
@@ -27,8 +32,7 @@
       <Flammability>0</Flammability>
     </statBases>
     <tickerType>Normal</tickerType>
-    <size>(2,2)</size>
-    <designationCategory>Ship</designationCategory>
+    <designationCategory>Data</designationCategory>
     <comps>
       <li Class="CompProperties_Power">
         <compClass>CompPowerTransmitter</compClass>
@@ -41,7 +45,6 @@
       <li>PlaceWorker_NotUnderRoof</li>
     </placeWorkers>
     <building>
-      <shipPart>true</shipPart>
       <destroySound>BuildingDestroyed_Metal_Small</destroySound>
     </building>
     <costList>

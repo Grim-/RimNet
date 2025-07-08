@@ -7,6 +7,22 @@ namespace RimNet
 {
     public static class NetworkConnectionMaker
     {
+        public static IntVec3 ToLocalIntVec3(this Rot4 rotation)
+        {
+            switch (rotation.AsInt)
+            {
+                case 0: // North
+                    return IntVec3.North;
+                case 1: // East
+                    return IntVec3.East;
+                case 2: // South
+                    return IntVec3.South;
+                case 3: // West
+                    return IntVec3.West;
+                default:
+                    return IntVec3.Zero;
+            }
+        }
         public static void ConnectAllNodesToServer(Comp_NetworkServer newServer)
         {
             foreach (Comp_NetworkNode node in GetPotentialNodesForServer(newServer))

@@ -16,9 +16,6 @@ namespace RimNet
         }
     }
 
-
-
-
     public class SignalNetwork
     {
         public string networkID;
@@ -57,6 +54,32 @@ namespace RimNet
                         queue.Enqueue(neighbor);
                     }
                 }
+            }
+        }
+
+
+        public void TransferTo(Comp_SignalNode node, SignalNetwork otherNetwork)
+        {
+            if (Contains(node))
+            {
+                nodes.Remove(node);
+                otherNetwork.JoinNetwork(node);
+            }
+        }
+
+
+        public void JoinNetwork(Comp_SignalNode node)
+        {
+            if (!Contains(node))
+            {
+                nodes.Add(node);
+            }
+        }
+        public void LeaveNetwork(Comp_SignalNode node)
+        {
+            if (Contains(node))
+            {
+                nodes.Remove(node);
             }
         }
 

@@ -6,6 +6,8 @@ using System.Linq;
 
 namespace RimNet
 {
+
+
     public class CompProperties_NetworkServer : CompProperties_NetworkNode
     {
         public CompProperties_NetworkServer()

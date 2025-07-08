@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <NeedDef>
+    <defName>Oxygen</defName>
+    <needClass>RimNet.Need_Oxygen</needClass>
+    <label>oxygen</label>
+    <description>Oxygen</description>
+    <listPriority>1200</listPriority>
+    <major>true</major>
+    <showForCaravanMembers>true</showForCaravanMembers>
+    <developmentalStageFilter>Baby, Child, Adult</developmentalStageFilter>
+    <showUnitTicks>true</showUnitTicks>
+  </NeedDef>
+
+</Defs>

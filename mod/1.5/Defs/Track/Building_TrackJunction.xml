@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+    <ThingDef ParentName="BuildingBase">
+      <defName>SignalConveryorBeltJunction</defName>
+      <label>converyor belt junction</label>
+      <description>It is impervious to damage.</description>
+      <useHitPoints>false</useHitPoints>
+      <thingClass>RimNet.Building_TrackJunction</thingClass>
+      <uiIconPath>Things/Building/Linked/VoidMetalWall_MenuIcon</uiIconPath>
+          <drawerType>MapMeshAndRealTime</drawerType>
+      <graphicData>
+        <texPath>Conveyor_Atlas</texPath>
+        <graphicClass>Graphic_Single</graphicClass>
+        <linkType>Basic</linkType>
+        <linkFlags>
+          <li>Custom9</li>
+        </linkFlags>
+        <damageData>
+          <cornerTL>Damage/Corner</cornerTL>
+          <cornerTR>Damage/Corner</cornerTR>
+          <cornerBL>Damage/Corner</cornerBL>
+          <cornerBR>Damage/Corner</cornerBR>
+          <edgeTop>Damage/Edge</edgeTop>
+          <edgeBot>Damage/Edge</edgeBot>
+          <edgeLeft>Damage/Edge</edgeLeft>
+          <edgeRight>Damage/Edge</edgeRight>
+        </damageData>
+      </graphicData>
+      <statBases>
+        <Flammability>0</Flammability>
+      </statBases>
+      <altitudeLayer>Building</altitudeLayer>
+      <passability>Impassable</passability>
+      <blockWind>true</blockWind>
+      <castEdgeShadows>true</castEdgeShadows>
+      <fillPercent>0.2</fillPercent>
+      <coversFloor>true</coversFloor>
+      <holdsRoof>true</holdsRoof>
+      <staticSunShadowHeight>1.0</staticSunShadowHeight>
+      <blockLight>true</blockLight>
+      <rotatable>false</rotatable>
+      <selectable>true</selectable>
+      <neverMultiSelect>true</neverMultiSelect>
+      <canOverlapZones>false</canOverlapZones>
+      <mineable>false</mineable>
+      <building>
+        <isInert>true</isInert>
+        <repairable>false</repairable>
+        <claimable>false</claimable>
+        <canBuildNonEdificesUnder>false</canBuildNonEdificesUnder>
+        <deconstructible>false</deconstructible>
+        <isTargetable>false</isTargetable>
+        <supportsWallAttachments>true</supportsWallAttachments>
+      </building>
+    </ThingDef>
+</Defs>

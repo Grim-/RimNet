@@ -28,6 +28,17 @@ namespace RimNet
                 SignalSource = this
             };
             SendSignal(signal);
+
+            if (SignalGroup != null)
+            {
+                SignalGroup.SendSignalToGroup(signal, this, (node, sig) =>
+                {
+                    if (node != this)
+                    {
+                        node.SendSignal(signal);
+                    }
+                });
+            }
         }
 
 
