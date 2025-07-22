@@ -38,5 +38,8 @@
     <placeWorkers>
       <li>RimNet.PlaceWorker_SignalNode</li>
     </placeWorkers>
+    <inspectorTabs>
+      <li>RimNet.ITab_ProximitySensor</li>
+    </inspectorTabs>
   </ThingDef>
 </Defs>

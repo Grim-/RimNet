@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThingDef ParentName="BuildingBase">
+    <defName>GasEmitter</defName>
+    <label>GasEmitter</label>
+    <description>A vent for equalizing the temperature between two rooms without allowing people to walk between them.</description>
+    <thingClass>Building</thingClass>
+    <graphicData>
+      <texPath>GasVent</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <shaderType>CutoutComplex</shaderType>
+    </graphicData>
+    <altitudeLayer>Building</altitudeLayer>
+    <passability>Standable</passability>
+    <blockWind>false</blockWind>
+    <fillPercent>0.1</fillPercent>
+    <coversFloor>true</coversFloor>
+    <blockLight>false</blockLight>
+    <blockWeather>false</blockWeather>
+    <castEdgeShadows>false</castEdgeShadows>
+    <canOverlapZones>false</canOverlapZones>
+    <staticSunShadowHeight>1.0</staticSunShadowHeight>
+    <statBases>
+      <WorkToBuild>400</WorkToBuild>
+      <MaxHitPoints>100</MaxHitPoints>
+      <Flammability>1.0</Flammability>
+    </statBases>
+    <tickerType>Normal</tickerType>
+    <costList>
+      <Steel>30</Steel>
+    </costList>
+    <terrainAffordanceNeeded>Medium</terrainAffordanceNeeded>
+    <building>
+      <canPlaceOverWall>true</canPlaceOverWall>
+    </building>
+    <researchPrerequisites>
+      <li>ComplexFurniture</li>
+    </researchPrerequisites>
+    <designationCategory>Data</designationCategory>
+    <designationHotKey>Misc8</designationHotKey>
+    <comps>
+      <li Class="CompProperties_Flickable">
+        <commandTexture>UI/Commands/Vent</commandTexture>
+        <commandLabelKey>CommandDesignateOpenCloseVentLabel</commandLabelKey>
+        <commandDescKey>CommandDesignateOpenCloseVentDesc</commandDescKey>
+      </li>
+      <li Class="RimNet.CompProperties_GasEmitter">
+        <gasType>ToxGas</gasType>
+      </li>
+      <li Class="RimNet.CompProperties_SignalFlicker" />
+    </comps>
+  </ThingDef>
+
+
+</Defs>

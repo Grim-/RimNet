@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
+using Verse.AI;
 
 namespace RimNet
 {
@@ -21,22 +22,38 @@ namespace RimNet
 
         public override bool CanFormSignalGroup => true;
 
+
+        public bool HasThingStored => ThingOnTop != null;
+
+
+        public override void PostSpawnSetup(bool respawningAfterLoad)
+        {
+            base.PostSpawnSetup(respawningAfterLoad);
+
+            TrySetThingOnTop();
+        }
+
         public override void OnSignalRecieved(Signal signal, SignalPort receivingPort)
         {
             base.OnSignalRecieved(signal, receivingPort);
 
-            this.Toggle();
+            this.SetState(signal.AsBool);
         }
 
-        //protected override void OnGroupSignalReceived(Signal signal)
-        //{
-        //    base.OnGroupSignalReceived(signal);
-        //    this.Toggle();
-        //}
-
-        public void Toggle()
+        public override void OnGroupSignalReceived(Signal signal, SignalGroup signalGroup)
         {
-            this.IsSpawned = !this.IsSpawned;
+            base.OnGroupSignalReceived(signal, signalGroup);
+            this.SetState(signal.AsBool);
+        }
+
+        public void SetState(bool shouldBeSpawned)
+        {
+            if (this.IsSpawned == shouldBeSpawned)
+            {
+                return;
+            }
+
+            this.IsSpawned = shouldBeSpawned;
 
             if (IsSpawned)
             {
@@ -48,30 +65,37 @@ namespace RimNet
             }
         }
 
-
         private void OnToggledOn()
         {
+            TrySetThingOnTop();
+
             if (ThingOnTop != null && !ThingOnTop.Spawned)
             {
                 GenSpawn.Spawn(ThingOnTop, parent.Position, parent.Map);
             }
         }
 
-        private void OnToggledOff()
+
+        private void TrySetThingOnTop()
         {
-            if (ThingOnTop != null && ThingOnTop.Spawned)
-            {
-                ThingOnTop.DeSpawn(DestroyMode.Vanish);
-            }
-            else if (ThingOnTop == null)
+            if (!HasThingStored)
             {
                 Thing thingOnThisCell = TryGetThingOnThisCell();
-
                 if (thingOnThisCell != null)
                 {
                     SetThing(thingOnThisCell);
                     ThingOnTop.DeSpawn(DestroyMode.Vanish);
                 }
+            }
+        }
+
+        private void OnToggledOff()
+        {
+            TrySetThingOnTop();
+
+            if (ThingOnTop != null && ThingOnTop.Spawned)
+            {
+                ThingOnTop.DeSpawn(DestroyMode.Vanish);
             }
         }
 
@@ -83,7 +107,20 @@ namespace RimNet
         private Thing TryGetThingOnThisCell()
         {
             return parent.Position.GetThingList(parent.Map)
-           .Where(x => x != parent && x.def.IsBuildingArtificial).FirstOrDefault();
+           .Where(x => x != parent && x.def.IsBuildingArtificial && x.def.BuildableByPlayer && x.Faction == Faction.OfPlayer).FirstOrDefault();
+        }
+
+        public override IEnumerable<Gizmo> CompGetGizmosExtra()
+        {
+            yield return new Command_Action()
+            {
+                defaultLabel = "WDWDw",
+                defaultDesc = "Ffefefe",
+                action = () =>
+                {
+
+                }
+            };
         }
 
         public override void PostExposeData()
@@ -102,6 +139,11 @@ namespace RimNet
                 Scribe_Deep.Look(ref ThingOnTop, "spawnedThing");
             }
 
+        }
+
+        public override string CompInspectStringExtra()
+        {
+            return base.CompInspectStringExtra() + $"Stored thing {(ThingOnTop != null ? ThingOnTop : null)}";
         }
     }
 }

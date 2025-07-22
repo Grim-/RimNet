@@ -11,12 +11,11 @@ namespace RimNet
         }
     }
 
-
     public class Comp_SensorWeather : Comp_SignalSensor
     {
         private WeatherDef lastWeather = null;
-        private WeatherDef targetWeather = null;
-        private WeatherSensorMode sensorMode = WeatherSensorMode.ON_START;
+        public WeatherDef targetWeather = null;
+        public WeatherSensorMode sensorMode = WeatherSensorMode.ON_START;
 
         protected override void SetupDefaultPorts()
         {
@@ -63,7 +62,7 @@ namespace RimNet
             }
         }
 
-        protected override float GetSensorValue()
+        public override float GetSensorValue()
         {
             if (!this.parent.Spawned || this.parent.Map == null || targetWeather == null)
                 return 0f;

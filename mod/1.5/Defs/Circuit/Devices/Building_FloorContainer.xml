@@ -7,7 +7,7 @@
       <thingClass>Building</thingClass>
       <category>Building</category>
       <graphicData>
-        <texPath>Things/Building/Misc/EggBox</texPath>
+        <texPath>PressurePlate</texPath>
         <graphicClass>Graphic_Single</graphicClass>
         <shadowData>
           <volume>(1,0.5,1)</volume>
@@ -31,7 +31,7 @@
         <Beauty>-2</Beauty>
       </statBases>
       <fillPercent>0</fillPercent>
-      <placingDraggableDimensions>2</placingDraggableDimensions>
+          <drawStyleCategory>Floors</drawStyleCategory>
       <costList>
         <Steel>15</Steel>
         <ComponentIndustrial>1</ComponentIndustrial>

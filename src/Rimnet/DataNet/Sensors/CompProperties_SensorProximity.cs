@@ -16,9 +16,16 @@ namespace RimNet
 
     public class Comp_SensorProximity : Comp_SignalSensor
     {
-        protected float ActiveRadius = 2f;
+        public float ActiveRadius = 2f;
+        public SensorTargetType TargetType = SensorTargetType.ANY_PAWN;
 
-        protected override float GetSensorValue()
+        public void SetRadius(float newRadius)
+        {
+            ActiveRadius = Mathf.Max(1, newRadius);
+        }
+
+
+        public override float GetSensorValue()
         {
             if (!this.parent.Spawned || this.parent.Map == null)
             {

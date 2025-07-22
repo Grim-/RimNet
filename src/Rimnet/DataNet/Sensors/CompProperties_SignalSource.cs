@@ -16,29 +16,7 @@ namespace RimNet
         protected override void SetupDefaultPorts()
         {
             ConnectionPorts = new List<SignalPort>();
-            ConnectionPorts.Add(new SignalPort(this, SignalPortType.OUT, IntVec3.Zero));
-        }
-
-        public virtual void TriggerSignal(float value)
-        {
-            var signal = new Signal
-            {
-                Value = value,
-                LastChangeTick = Find.TickManager.TicksGame,
-                SignalSource = this
-            };
-            SendSignal(signal);
-
-            if (SignalGroup != null)
-            {
-                SignalGroup.SendSignalToGroup(signal, this, (node, sig) =>
-                {
-                    if (node != this)
-                    {
-                        node.SendSignal(signal);
-                    }
-                });
-            }
+            CreatePort(SignalPortType.OUT, IntVec3.Zero, "OUT", 0);
         }
 
 
@@ -73,4 +51,5 @@ namespace RimNet
             };
         }
     }
+
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using RimWorld;
+using System.Collections.Generic;
 using Verse;
 
 namespace RimNet
@@ -26,19 +27,6 @@ namespace RimNet
             get => ShouldInvert;
             set => ShouldInvert = value;
         }
-
-        public int CustomUpdateInterval
-        {
-            get => customUpdateInterval;
-            set => customUpdateInterval = value;
-        }
-
-        public string IntervalBuffer
-        {
-            get => intervalBuffer;
-            set => intervalBuffer = value;
-        }
-
 
         public override void Initialize(CompProperties props)
         {
@@ -70,7 +58,40 @@ namespace RimNet
             TriggerSignal(currentValue);
         }
 
-        protected abstract float GetSensorValue();
+        public abstract float GetSensorValue();
+
+
+
+        public bool IsValid(SensorTargetType sensorTargetType, Thing thing)
+        {
+            switch (sensorTargetType)
+            {
+                case SensorTargetType.ANY_PAWN:
+                    return thing is Pawn;
+                case SensorTargetType.COLONISTS:
+                    return thing is Pawn pawn && pawn.IsColonist;
+                case SensorTargetType.ENEMIES:
+                    return thing is Pawn enemy && enemy.HostileTo(Faction.OfPlayer);
+                case SensorTargetType.ANIMALS:
+                    return thing is Pawn anmalPawn && anmalPawn.RaceProps.Animal;
+                case SensorTargetType.NON_COLONISTS:
+                    return thing is Pawn non && !non.IsColonist;
+            }
+
+            return false;
+        }
+
+        public override void SyncWithGroupNode(Comp_SignalNode senderNode)
+        {
+            base.SyncWithGroupNode(senderNode);
+
+
+            if (senderNode is Comp_SignalSensor signalSensor)
+            {
+                this.customUpdateInterval = signalSensor.customUpdateInterval;
+                this.ShouldInvert = signalSensor.ShouldInvert;
+            }
+        }
 
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
@@ -78,8 +99,6 @@ namespace RimNet
             {
                 yield return gizmo;
             }
-
-            yield return new Gizmo_SensorConfig(this);
         }
 
         public override void PostExposeData()

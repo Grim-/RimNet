@@ -21,10 +21,9 @@ namespace RimNet
         protected override void SetupDefaultPorts()
         {
             ConnectionPorts = new List<SignalPort>();
-            CreatePort(SignalPortType.IN, IntVec3.Zero, "IN", 0);
-            CreatePort(SignalPortType.OUT, IntVec3.Zero, "OUT", 0);
+            CreatePort(SignalPortType.BOTH, IntVec3.Zero, "BOTH", 0);
+            CreatePort(SignalPortType.BOTH, IntVec3.Zero, "BOTH", 1);
         }
-
 
         public override bool IsSignalTerminal()
         {
@@ -48,15 +47,9 @@ namespace RimNet
         {   
             base.OnSignalRecieved(signal, receivingPort);
 
-            if (TryGetConnectionPort(SignalPortType.OUT, out SignalPort foundPort))
+            if (parent.TryGetComp(out CompFlickable flickable))
             {
-                if (foundPort.HasConnectTarget)
-                {
-                    if (foundPort.ConnectedNode.parent.TryGetComp(out CompFlickable flickable))
-                    {
-                        flickable.DoFlick();
-                    }
-                }
+                flickable.SwitchIsOn = signal.AsBool;
             }
         }
     }

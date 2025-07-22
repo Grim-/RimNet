@@ -80,9 +80,9 @@ namespace RimNet
             TryJoinNetwork();
         }
 
-        public override void PostDeSpawn(Map previousMap)
+        public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
         {
-            base.PostDeSpawn(previousMap);
+            base.PostDeSpawn(map, mode);
             NetworkConnectionMaker.DisconnectFromNetwork(this);
         }
 

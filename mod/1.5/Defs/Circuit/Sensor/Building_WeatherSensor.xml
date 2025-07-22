@@ -38,6 +38,9 @@
     <placeWorkers>
       <li>RimNet.PlaceWorker_SignalNode</li>
     </placeWorkers>
+    <inspectorTabs>
+      <li>RimNet.ITab_WeatherSensor</li>
+    </inspectorTabs>
   </ThingDef>
 
 </Defs>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <BodyDef>
+    <defName>DroneBody</defName>
+    <label>drone</label>
+    <corePart>
+      <def>DroneProcessor</def>
+      <height>Middle</height>
+      <depth>Outside</depth>
+      <groups>
+        <li>Torso</li>
+      </groups>
+      <parts>
+        <li>
+          <def>DroneCasing</def>
+          <coverage>1.0</coverage>
+          <depth>Outside</depth>
+          <groups>
+            <li>Torso</li>
+          </groups>
+        </li>
+        <li>
+          <def>DroneWeaponMount</def>
+          <customLabel>weapon mount</customLabel>
+          <coverage>0.15</coverage>
+          <groups>
+            <li>ManipulationLimb</li>
+          </groups>
+        </li>
+        <li>
+          <def>DroneThruster</def>
+          <customLabel>left thruster</customLabel>
+          <coverage>0.10</coverage>
+          <groups>
+            <li>MovingLimb</li>
+          </groups>
+        </li>
+        <li>
+          <def>DroneThruster</def>
+          <customLabel>right thruster</customLabel>
+          <coverage>0.10</coverage>
+          <groups>
+            <li>MovingLimb</li>
+          </groups>
+        </li>
+      </parts>
+    </corePart>
+  </BodyDef>
+
+  <BodyPartDef>
+    <defName>DroneProcessor</defName>
+    <label>processor</label>
+    <hitPoints>50</hitPoints>
+    <skinCovered>false</skinCovered>
+    <solid>true</solid>
+    <bleedRate>0</bleedRate>
+    <canScarify>false</canScarify>
+    <canSuggestAmputation>false</canSuggestAmputation>
+    <tags>
+      <li>ConsciousnessSource</li>
+      <li>BloodPumpingSource</li>
+      <li>BreathingSource</li>
+      <li>SightSource</li>
+      <li>HearingSource</li>
+    </tags>
+  </BodyPartDef>
+
+  <BodyPartDef>
+    <defName>DroneCasing</defName>
+    <label>casing</label>
+    <hitPoints>100</hitPoints>
+    <skinCovered>false</skinCovered>
+    <solid>true</solid>
+    <bleedRate>0</bleedRate>
+  </BodyPartDef>
+
+  <BodyPartDef>
+    <defName>DroneWeaponMount</defName>
+    <label>weapon mount</label>
+    <hitPoints>40</hitPoints>
+    <skinCovered>false</skinCovered>
+    <solid>true</solid>
+    <bleedRate>0</bleedRate>
+    <tags>
+      <li>ManipulationLimbCore</li>
+    </tags>
+  </BodyPartDef>
+
+  <BodyPartDef>
+    <defName>DroneThruster</defName>
+    <label>thruster</label>
+    <hitPoints>35</hitPoints>
+    <skinCovered>false</skinCovered>
+    <solid>true</solid>
+    <bleedRate>0</bleedRate>
+    <tags>
+      <li>MovingLimbCore</li>
+    </tags>
+  </BodyPartDef>
+
+</Defs>

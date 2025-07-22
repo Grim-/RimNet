@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThingDef ParentName="BuildingBase">
+    <defName>RimNet_RetractableBridgeBase</defName>
+    <label>retractable bridge base</label>
+    <thingClass>RimNet.Building_RetractableBridge</thingClass>
+    <graphicData>
+      <texPath>Things/Building/Ship/ShipComputerCore</texPath>
+      <graphicClass>Graphic_Multi</graphicClass>
+      <drawSize>(2,2)</drawSize>
+      <shadowData>
+        <volume>(2.76, 0.5, 2.66)</volume>
+        <offset>(0,0,-0.05)</offset>
+      </shadowData>
+    </graphicData>
+    <rotatable>true</rotatable>
+    <altitudeLayer>Floor</altitudeLayer>
+    <passability>Standable</passability>
+    <pathCost>0</pathCost>
+    <statBases>
+      <MaxHitPoints>250</MaxHitPoints>
+      <WorkToBuild>2000</WorkToBuild>
+      <Flammability>0.5</Flammability>
+    </statBases>
+    <building Class="RimNet.BridgeBuildingProps">
+      <ai_chillDestination>false</ai_chillDestination>
+      <allowWireConnection>false</allowWireConnection>
+        <bridgeTerrainDef>Bridge</bridgeTerrainDef>
+      <bridgeLength>15</bridgeLength>
+      <bridgeWidth>10</bridgeWidth>
+      <isEdifice>false</isEdifice>
+    </building>
+    <costList>
+      <Steel>100</Steel>
+      <ComponentIndustrial>4</ComponentIndustrial>
+    </costList>
+    <comps>
+      <li Class="RimWorld.CompProperties_Power">
+        <compClass>CompPowerTrader</compClass>
+        <basePowerConsumption>50</basePowerConsumption>
+      </li>
+    </comps>
+  </ThingDef>
+</Defs>

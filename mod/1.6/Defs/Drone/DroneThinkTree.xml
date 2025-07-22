@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThinkTreeDef>
+    <defName>BasicDroneCoreTree</defName>
+    <thinkRoot Class="ThinkNode_Priority">
+      <subNodes>
+
+        <li Class="ThinkNode_Subtree">
+          <treeDef>Despawned</treeDef>
+        </li>
+
+        <!-- Sleep if downed -->
+        <li Class="ThinkNode_ConditionalDowned">
+          <subNodes>
+            <li Class="JobGiver_ForceSleepNow" />
+          </subNodes>
+        </li>
+
+        <!-- Sleep if no controller -->
+        <li Class="RimNet.ThinkNode_ConditionalNoController">
+          <subNodes>
+            <li Class="JobGiver_ForceSleepNow" />
+          </subNodes>
+        </li>
+
+        <li Class="RimNet.ThinkNode_ConditionalShouldShutdown">
+          <subNodes>
+            <li Class="JobGiver_ForceSleepNow" />
+          </subNodes>
+        </li>
+
+      </subNodes>
+    </thinkRoot>
+  </ThinkTreeDef>
+
+</Defs>

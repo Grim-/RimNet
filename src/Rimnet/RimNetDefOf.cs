@@ -8,5 +8,7 @@ namespace RimNet
     {
         public static TrackTypeDef ItemTrack;
         public static TrackTypeDef TrainTrack;
+
+        public static JobDef StoreSelfInController;
     }
 }

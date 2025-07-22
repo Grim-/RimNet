@@ -27,32 +27,6 @@ namespace RimNet
         public static readonly Texture2D UIBGIcon = ContentFinder<Texture2D>.Get("UI_Starfall");
         
 
-
-        //private string GetSystemStatus()
-        //{
-        //    if (breakdownableComp != null && breakdownableComp.BrokenDown)
-        //        return "FAULT";
-
-        //    if (refuelableComp != null && !refuelableComp.HasFuel)
-        //        return "NO_FUEL";
-
-        //    if (flickableComp != null && !flickableComp.SwitchIsOn)
-        //        return "OFFLINE";
-
-        //    if (autoPoweredComp != null && !autoPoweredComp.WantsToBeOn)
-        //        return "AUTO_OFF";
-
-        //    if (toxifier != null && !toxifier.CanPolluteNow)
-        //        return "POLLUTION";
-
-        //    if (!powerPlant.PowerOn)
-        //        return "INACTIVE";
-
-        //    if (powerPlant.PowerOutput > 0f)
-        //        return "GENERATING";
-
-        //    return "STANDBY";
-        //}
         public static Color GetStatusColor(string status)
         {
             switch (status.ToUpper())

@@ -28,6 +28,7 @@
       <blueprintGraphicData>
         <texPath>Things/Building/Linked/PowerConduit_Blueprint_Atlas</texPath>
       </blueprintGraphicData>
+
     </building>
     <drawerType>MapMeshAndRealTime</drawerType>
     <altitudeLayer>Conduits</altitudeLayer>
@@ -40,7 +41,7 @@
       <Flammability>0.7</Flammability>
       <Beauty>-2</Beauty>
     </statBases>
-    <placingDraggableDimensions>1</placingDraggableDimensions>
+    <drawStyleCategory>Walls</drawStyleCategory>
     <costList>
       <Steel>1</Steel>
     </costList>

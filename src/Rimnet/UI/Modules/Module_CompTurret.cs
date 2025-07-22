@@ -57,7 +57,7 @@ namespace RimNet
             // Targeting button
             if (ExpanseUI.DrawButton(sections[6].InsetBy(2, 2, 2, 2), buttonText))
             {
-                Find.Targeter.BeginTargeting(TargetingParameters.ForAttackHostile(), delegate (LocalTargetInfo target)
+                Find.Targeter.BeginTargeting(TargetingParameters.ForAttackAny(), delegate (LocalTargetInfo target)
                 {
                     turret.OrderAttack(target);
                 });
@@ -217,7 +217,7 @@ namespace RimNet
             // Targeting button
             if (Widgets.ButtonText(sections[6].InsetBy(2, 2, 2, 2), buttonText))
             {
-                Find.Targeter.BeginTargeting(TargetingParameters.ForAttackHostile(), delegate (LocalTargetInfo target)
+                Find.Targeter.BeginTargeting(TargetingParameters.ForAttackAny(), delegate (LocalTargetInfo target)
                 {
                     turret.OrderAttack(target);
                 });

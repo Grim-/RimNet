@@ -76,15 +76,16 @@ namespace RimNet
             }
 
             JoinOrFormSignalGroup();
-            // Now it is safe to update connections, because OwnerNode is guaranteed not to be null.
             SignalConnectionMaker.UpdateConnectionsFor(this);
             var signalManager = this.parent.Map?.GetComponent<SignalManager>();
             Log.Message("signal node placed, rebuilding network");
             signalManager?.MarkNetworksDirty();
         }
-        public override void PostDeSpawn(Map map)
+
+
+        public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
         {
-            base.PostDeSpawn(map);
+            base.PostDeSpawn(map, mode);
             ClearPorts();
 
             if (CanFormSignalGroup && SignalGroup != null)
@@ -105,23 +106,45 @@ namespace RimNet
             {
                 signalManager.SendSignal(signal, this);
             }
+
+            if (SignalGroup != null)
+            {
+                SignalGroup.PropagateSignal(signal, this);
+            }
+        }
+
+        public virtual void TriggerSignal(float value)
+        {
+            var signal = new Signal
+            {
+                Value = value,
+                LastChangeTick = Find.TickManager.TicksGame,
+                SignalSource = this
+            };
+
+            SendSignal(signal);
         }
 
         public virtual void OnSignalRecieved(Signal signal, SignalPort receivingPort)
         {
-            // Only propagate to group if the signal came from outside the group
             if (SignalGroup != null)
             {
-                SignalGroup.SendSignalToGroup(signal, this, (node, sig) =>
+                Comp_SignalNode senderNode = receivingPort.ConnectedNode;
+                if (senderNode != null && SignalGroup.IsPartOfGroup(senderNode))
                 {
-                    if (node != this)
-                    {
-                        node.OnSignalRecieved(signal, receivingPort);
-                    }
-                });
+                    return;
+                }
+                SignalGroup.PropagateSignal(signal, this);
             }
         }
 
+        /// <summary>
+        /// Called when a signal is received from another member of the same SignalGroup.
+        /// </summary>
+        public virtual void OnGroupSignalReceived(Signal signal, SignalGroup signalGroup)
+        {
+
+        }
 
         #region Port
 
@@ -181,6 +204,14 @@ namespace RimNet
             signalGroup.JoinGroup(this);
             signalGroup.SelectBestOwner();
             SyncNetWorkToGroupOwner();
+        }
+
+        public virtual void SyncWithGroupNode(Comp_SignalNode senderNode)
+        {
+            if (senderNode == this)
+            {
+                return;
+            }
         }
 
         private void SyncNetWorkToGroupOwner()
@@ -333,7 +364,7 @@ namespace RimNet
 
         public virtual IEnumerable<PropagationTarget> GetPropagationTargets()
         {
-            foreach (var sendingPort in AllOutPorts.Where(x=> x.Enabled && x.HasConnectTarget))
+            foreach (var sendingPort in AllOutPorts.Where(x=> x.Enabled && x.HasConnectTarget && !x.ConnectedNode.IsSignalTerminal()))
             {
                 var neighborNode = sendingPort.ConnectedNode;
                 var receivingPort = sendingPort.ConnectedPort;
@@ -592,26 +623,6 @@ namespace RimNet
         public override string CompInspectStringExtra()
         {
             string baseString = base.CompInspectStringExtra() ?? "";
-            if (ConnectedParents != null)
-            {
-                foreach (var parentNode in ConnectedParents)
-                {
-                    if (parentNode != null)
-                    {
-                        baseString += $"Parent : {parentNode.parent.Label}\r\n";
-                    }
-                }
-            }
-            if (ConnectedChildren != null)
-            {
-                foreach (var childNode in ConnectedChildren)
-                {
-                    if (childNode != null)
-                    {
-                        baseString += $"Child : {childNode.parent.Label}\r\n";
-                    }
-                }
-            }
 
             var signalManager = this.parent.Map?.GetComponent<SignalManager>();
             if (signalManager != null)
@@ -620,17 +631,12 @@ namespace RimNet
 
                 if (network != null)
                 {
-                    baseString += $"Network {network.networkID}\r\n";
+                    baseString += $"{network.networkID}\r\n";
                 }
             }
-
-            if (CanFormSignalGroup && SignalGroup != null)
-            {
-                baseString += $"Group {SignalGroup.GroupLabel} {(SignalGroup.IsGroupOwner(this) ? "Owner" : "Member")}";
-            }
-
             return baseString.TrimEndNewlines();
         }
+
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
             foreach (var port in AllPorts)

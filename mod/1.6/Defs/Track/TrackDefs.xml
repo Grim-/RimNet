@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <RimNet.TrackTypeDef>
+    <defName>ItemTrack</defName>
+    <trackType>RimNet.TrackNetwork</trackType>
+  </RimNet.TrackTypeDef>
+
+  <RimNet.TrackTypeDef>
+    <defName>TrainTrack</defName>
+    <trackType>RimNet.TrainTrackNetwork</trackType>
+  </RimNet.TrackTypeDef>
+</Defs>

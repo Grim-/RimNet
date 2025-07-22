@@ -72,13 +72,13 @@ namespace RimNet
             return true;
         }
 
-        public override void PostDeSpawn(Map previousMap)
+        public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
         {
             if (hostedNetwork != null)
             {
-                NetworkConnectionMaker.DisconnectAllFromServer(this, previousMap);
+                NetworkConnectionMaker.DisconnectAllFromServer(this, map);
             }
-            base.PostDeSpawn(previousMap);
+            base.PostDeSpawn(map, mode);
         }
 
         public override IEnumerable<Gizmo> CompGetGizmosExtra()

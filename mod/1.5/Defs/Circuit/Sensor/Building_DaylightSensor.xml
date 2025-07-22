@@ -39,7 +39,6 @@
     </building>
     <comps>
       <li Class="RimNet.CompProperties_SensorDaylight">
-        <sensorUpdateInterval>250</sensorUpdateInterval>
       </li>
     </comps>
     <leaveResourcesWhenKilled>false</leaveResourcesWhenKilled>
@@ -50,6 +49,9 @@
     <placeWorkers>
       <li>RimNet.PlaceWorker_SignalNode</li>
     </placeWorkers>
+    <inspectorTabs>
+      <li>RimNet.ITab_DaylightSensor</li>
+    </inspectorTabs>
     <designationHotKey>Misc2</designationHotKey>
     <researchPrerequisites>
       <li>MicroelectronicsBasics</li>

@@ -9,6 +9,9 @@ namespace RimNet
 
         public Comp_SignalNode SignalSource;
 
+
+        public bool AsBool => Value >= 1f;
+
         public Signal(Comp_SignalNode source, float value, int lastChangeTick)
         {
             SignalSource = source;

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThingDef ParentName="BaseMechanoid">
+      <defName>CombatDrone</defName>
+      <label>combat drone</label>
+      <thingClass>RimNet.Drone</thingClass>
+      <tickerType>Normal</tickerType>
+
+      <statBases>
+        <MaxHitPoints>80</MaxHitPoints>
+        <MoveSpeed>5.0</MoveSpeed>
+        <ArmorRating_Blunt>0.20</ArmorRating_Blunt>
+        <ArmorRating_Sharp>0.25</ArmorRating_Sharp>
+        <BandwidthCost>1</BandwidthCost>
+      </statBases>
+
+      <race>
+        <intelligence>ToolUser</intelligence>
+        <thinkTreeMain>DroneBrain</thinkTreeMain>
+        <body>DroneBody</body>
+        <fleshType>Mechanoid</fleshType>
+        <baseBodySize>0.8</baseBodySize>
+        <baseHealthScale>0.7</baseHealthScale>
+        <lifeStageAges>
+          <li>
+            <def>MechanoidFullyFormed</def>
+            <minAge>0</minAge>
+          </li>
+        </lifeStageAges>
+      </race>
+
+      <comps Inherit="false">
+      </comps>
+
+      <verbs>
+        <li>
+          <verbClass>Verb_Shoot</verbClass>
+          <defaultProjectile>Bullet_MiniTurret</defaultProjectile>
+          <warmupTime>0.5</warmupTime>
+          <range>20</range>
+          <burstShotCount>3</burstShotCount>
+          <ticksBetweenBurstShots>8</ticksBetweenBurstShots>
+          <soundCast>Shot_MiniTurret</soundCast>
+          <soundCastTail>GunTail_Light</soundCastTail>
+          <muzzleFlashScale>3</muzzleFlashScale>
+        </li>
+        <li>
+          <verbClass>Verb_ShootBeam</verbClass>
+          <hasStandardCommand>true</hasStandardCommand>
+          <warmupTime>1.0</warmupTime>
+          <range>24.9</range>
+          <minRange>3.9</minRange>
+          <beamFullWidthRange>6.9</beamFullWidthRange>
+          <burstShotCount>5</burstShotCount>
+          <showBurstShotStats>false</showBurstShotStats>
+          <beamWidth>6</beamWidth>
+          <ticksBetweenBurstShots>22</ticksBetweenBurstShots>
+          <beamDamageDef>Beam</beamDamageDef>
+          <soundCastTail>GunTail_Medium</soundCastTail>
+          <muzzleFlashScale>9</muzzleFlashScale>
+          <soundCastBeam>BeamGraser_Shooting</soundCastBeam>
+          <beamGroundFleckDef>Fleck_BeamBurn</beamGroundFleckDef>
+          <beamFleckChancePerTick>0.32</beamFleckChancePerTick>
+          <beamMaxDeviation>1.5</beamMaxDeviation>
+          <beamCurvature>0.6</beamCurvature>
+          <beamMoteDef>Mote_GraserBeamBase</beamMoteDef>
+          <beamEndEffecterDef>GraserBeam_End</beamEndEffecterDef>
+          <beamChanceToStartFire>0.85</beamChanceToStartFire>
+          <beamChanceToAttachFire>0.85</beamChanceToAttachFire>
+          <beamFireSizeRange>0.55~0.85</beamFireSizeRange>
+          <beamLineFleckDef>Fleck_BeamSpark</beamLineFleckDef>
+          <beamStartOffset>0.8</beamStartOffset>
+          <beamLineFleckChanceCurve>
+            <points>
+              <li>(0, 0)</li>
+              <li>(0.65, 0.4)</li>
+              <li>(1, 0.75)</li>
+            </points>
+          </beamLineFleckChanceCurve>
+        </li>
+      </verbs>
+
+    </ThingDef>
+
+    <PawnKindDef ParentName="BaseMechanoidKind">
+      <defName>CombatDrone</defName>
+      <label>combat drone</label>
+      <race>CombatDrone</race>
+      <combatPower>85</combatPower>
+      <lifeStages>
+        <li>
+          <bodyGraphicData>
+            <texPath>Things/Building/Power/PowerSwitch</texPath>
+            <graphicClass>Graphic_Single</graphicClass>
+            <shaderType>Transparent</shaderType>
+            <damageData>
+              <rect>(0.2,0.2,0.6,0.6)</rect>
+            </damageData>
+          </bodyGraphicData>
+        </li>
+      </lifeStages>
+    </PawnKindDef>
+
+</Defs>

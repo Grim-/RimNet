@@ -7,7 +7,7 @@
       <thingClass>Building</thingClass>
       <category>Building</category>
       <graphicData>
-        <texPath>Terrain/Surfaces/Underwall</texPath>
+        <texPath>PressurePlate</texPath>
         <graphicClass>Graphic_Single</graphicClass>
         <shaderType>Cutout</shaderType>
         <damageData>
@@ -29,13 +29,13 @@
         <Beauty>-2</Beauty>
       </statBases>
       <fillPercent>0</fillPercent>
-      <placingDraggableDimensions>2</placingDraggableDimensions>
+          <drawStyleCategory>Floors</drawStyleCategory>
       <costList>
         <Steel>15</Steel>
         <ComponentIndustrial>1</ComponentIndustrial>
       </costList>
       <comps>
-        <li Class="RimNet.CompProperties_SignalSensorPressurePlate" />
+        <li Class="RimNet.CompProperties_SensorPressurePlate" />
       </comps>
       <rotatable>false</rotatable>
       <selectable>true</selectable>
@@ -51,6 +51,9 @@
       <placeWorkers>
         <li>RimNet.PlaceWorker_SignalNode</li>
       </placeWorkers>
+      <inspectorTabs>
+        <li>RimNet.ITab_PressurePlate</li>
+      </inspectorTabs>
     </ThingDef>
 
 

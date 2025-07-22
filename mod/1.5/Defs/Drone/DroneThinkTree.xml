@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThinkTreeDef>
+    <defName>DroneBrain</defName>
+    <thinkRoot Class="ThinkNode_Priority">
+      <subNodes>
+
+        <!-- Downed -->
+        <li Class="ThinkNode_ConditionalDowned">
+          <subNodes>
+            <li Class="JobGiver_ForceSleepNow" />
+          </subNodes>
+        </li>
+
+        <!-- No controller - stand and wait -->
+        <li Class="RimNet.ThinkNode_ConditionalNoController">
+          <subNodes>
+            <li Class="JobGiver_ForceSleepNow" />
+          </subNodes>
+        </li>
+
+        <li Class="RimNet.ThinkNode_ConditionalNearController">
+          <invert>true</invert>
+          <subNodes>
+            <li Class="RimNet.JobGiver_GotoController" />
+          </subNodes>
+        </li>
+
+        <li Class="RimNet.ThinkNode_ConditionalNearController">
+          <subNodes>
+            <li Class="JobGiver_ForceSleepNow">
+            <!--  <storeJob>StoreSelfInController</storeJob> -->
+            </li>
+          </subNodes>
+        </li>
+
+      </subNodes>
+    </thinkRoot>
+  </ThinkTreeDef>
+</Defs>

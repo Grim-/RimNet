@@ -14,8 +14,8 @@ namespace RimNet
 
     public class Comp_SensorDaylight : Comp_SignalSensor
     {
-        protected DayLightSensorMode currentMode = DayLightSensorMode.DAWN;
-        protected float customThreshold = 0.4f;
+        public DayLightSensorMode currentMode = DayLightSensorMode.DAWN;
+        public float customThreshold = 0.4f;
         protected float lastSkyGlow = -1f;
 
         public void SetMode(DayLightSensorMode mode)
@@ -68,7 +68,7 @@ namespace RimNet
             }
         }
 
-        protected override float GetSensorValue()
+        public override float GetSensorValue()
         {
             if (!this.parent.Spawned || this.parent.Map == null)
             {

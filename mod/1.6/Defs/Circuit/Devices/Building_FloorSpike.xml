@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+    <ThingDef ParentName="BuildingBase">
+      <defName>FloorSpikeTrap</defName>
+      <label>floor spike trap</label>
+      <description>place things on top, when toggled off its hidden underground, when toggled on its brought above ground.</description>
+      <thingClass>Building</thingClass>
+      <category>Building</category>
+      <graphicData>
+        <texPath>SpikeTrap</texPath>
+        <graphicClass>Graphic_Single</graphicClass>
+        <shaderType>Cutout</shaderType>
+        <damageData>
+          <rect>(0.2,0.2,0.6,0.6)</rect>
+        </damageData>
+      </graphicData>
+      <building>
+        <ai_chillDestination>false</ai_chillDestination>
+        <allowWireConnection>false</allowWireConnection>
+        <isEdifice>false</isEdifice>
+      </building>
+      <altitudeLayer>Conduits</altitudeLayer>
+      <passability>Standable</passability>
+      <leaveResourcesWhenKilled>false</leaveResourcesWhenKilled>
+      <statBases>
+        <MaxHitPoints>120</MaxHitPoints>
+        <WorkToBuild>200</WorkToBuild>
+        <Flammability>0.5</Flammability>
+        <Beauty>-2</Beauty>
+      </statBases>
+      <fillPercent>0</fillPercent>
+          <drawStyleCategory>Floors</drawStyleCategory>
+      <costList>
+        <Steel>15</Steel>
+        <ComponentIndustrial>1</ComponentIndustrial>
+      </costList>
+      <comps>
+        <li Class="RimNet.CompProperties_SensorPressurePlate" />
+      </comps>
+      <rotatable>false</rotatable>
+      <selectable>true</selectable>
+      <neverMultiSelect>false</neverMultiSelect>
+      <tickerType>Normal</tickerType>
+    <designationCategory>Data</designationCategory>
+      <uiOrder>2010</uiOrder>
+      <constructEffect>ConstructMetal</constructEffect>
+      <designationHotKey>Misc2</designationHotKey>
+      <researchPrerequisites>
+        <li>Electricity</li>
+      </researchPrerequisites>
+      <placeWorkers>
+        <li>RimNet.PlaceWorker_SignalNode</li>
+      </placeWorkers>
+      <inspectorTabs>
+        <li>RimNet.ITab_PressurePlate</li>
+      </inspectorTabs>
+    </ThingDef>
+
+
+</Defs>

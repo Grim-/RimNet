@@ -20,7 +20,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>D:\Games\RimWorld\Mods\RimNet\1.5\Assemblies\</OutputPath>
+    <OutputPath>H:\SteamLibrary\steamapps\common\RimWorld\Mods\RimNet\1.6\Assemblies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -39,8 +39,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>D:\Games\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>H:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -80,8 +79,16 @@
     <Publicize Include="Assembly-CSharp:Verse.RegionGrid.map" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Comps\CompProperties_GasEmitter.cs" />
+    <Compile Include="Comps\Adaptors\CompProperties_FlickableSignalAdapter.cs" />
+    <Compile Include="Comps\Adaptors\CompProperties_PowerSignalAdapter.cs" />
+    <Compile Include="Comps\Contraptions\CompProperties_Contraption.cs" />
+    <Compile Include="Comps\Contraptions\Emitters\CompProperties_Emitter.cs" />
+    <Compile Include="Comps\Contraptions\CompProperties_GasEmitter.cs" />
     <Compile Include="Comps\CompProperties_NetworkServer.cs" />
+    <Compile Include="Comps\Contraptions\Emitters\CompProperties_RadialDamageEmitter.cs" />
+    <Compile Include="Comps\Contraptions\Emitters\CompProperties_RadialEmitter.cs" />
+    <Compile Include="Comps\Adaptors\CompProperties_EmitterSignalAdapter.cs" />
+    <Compile Include="Comps\Contraptions\CompProperties_Sprinkler.cs" />
     <Compile Include="Conveyor\Building_TrackJunction.cs" />
     <Compile Include="Conveyor\Building_TrackStation.cs" />
     <Compile Include="Conveyor\Building_TrainTrack.cs" />
@@ -90,8 +97,14 @@
     <Compile Include="Conveyor\Thing_TrainCar.cs" />
     <Compile Include="Conveyor\TrackTypeDef.cs" />
     <Compile Include="Conveyor\TrainTrackNetwork.cs" />
+    <Compile Include="DataNet\Sensors\CompProperties_SignalDelayNode.cs" />
+    <Compile Include="DataNet\UI\ITab_SignalDelayNode.cs" />
+    <Compile Include="Drone\CompProperties_DroneController.cs" />
+    <Compile Include="Drone\Drone.cs" />
     <Compile Include="DataNet\Sensors\CompProperties_SensorWeather.cs" />
     <Compile Include="DataNet\Gizmos\Gizmo_SensorConfig.cs" />
+    <Compile Include="DataNet\Sensors\CompProperties_SignalButton.cs" />
+    <Compile Include="DataNet\Sensors\CompProperties_SignalLever.cs" />
     <Compile Include="DataNet\Signal\ActiveSignal.cs" />
     <Compile Include="DataNet\Base\CompProperties_SignalTerminal.cs" />
     <Compile Include="DataNet\Gizmos\Gizmo_SignalBase.cs" />
@@ -107,7 +120,7 @@
     <Compile Include="DataNet\Routing\CompProperties_SignalReciever.cs" />
     <Compile Include="DataNet\Sensors\CompProperties_SensorProximity.cs" />
     <Compile Include="DataNet\Sensors\CompProperties_SignalSensor.cs" />
-    <Compile Include="DataNet\Sensors\CompProperties_SignalSensorPressurePlate.cs" />
+    <Compile Include="DataNet\Sensors\CompProperties_SensorPressurePlate.cs" />
     <Compile Include="DataNet\Sensors\CompProperties_SignalSource.cs" />
     <Compile Include="DataNet\Routing\CompProperties_SignalSplitter.cs" />
     <Compile Include="DataNet\Actions\CompProperties_SignalFlicker.cs" />
@@ -122,8 +135,29 @@
     <Compile Include="DataNet\Signal\SignalManager.cs" />
     <Compile Include="DataNet\Signal\SignalNetwork.cs" />
     <Compile Include="DataNet\Signal\SignalPort.cs" />
-    <Compile Include="DataNet\Util\SignalPortType.cs" />
-    <Compile Include="DataNet\Util\SpatialNodeData.cs" />
+    <Compile Include="DataNet\Actions\Building_RetractableBridge.cs" />
+    <Compile Include="DataNet\UI\SensorTabs\ITab_DaylightSensor.cs" />
+    <Compile Include="DataNet\UI\SensorTabs\ITab_PressurePlate.cs" />
+    <Compile Include="DataNet\UI\SensorTabs\ITab_ProximitySensor.cs" />
+    <Compile Include="DataNet\UI\ITab_SignalNodeBase.cs" />
+    <Compile Include="DataNet\UI\SensorTabs\ITab_SignalSensor.cs" />
+    <Compile Include="DataNet\UI\SensorTabs\ITab_WeatherSensor.cs" />
+    <Compile Include="DataNet\UI\RimNetGUI.cs" />
+    <Compile Include="DataNet\UI\RowLayoutManager.cs" />
+    <Compile Include="DataNet\UI\Window_SignalGroup.cs" />
+    <Compile Include="DataNet\Signal\SignalPortType.cs" />
+    <Compile Include="DataNet\Base\SpatialNodeData.cs" />
+    <Compile Include="Drone\JobDriver_StoreSelfInController.cs" />
+    <Compile Include="Drone\JobGiver_GotoController.cs" />
+    <Compile Include="Drone\JobGiver_StoreInController.cs" />
+    <Compile Include="Drone\ThinkNode_ConditionalInCombat.cs" />
+    <Compile Include="Drone\ThinkNode_ConditionalIsDroneState.cs" />
+    <Compile Include="Drone\ThinkNode_ConditionalIsIdle.cs" />
+    <Compile Include="Drone\ThinkNode_ConditionalIsPowered.cs" />
+    <Compile Include="Drone\ThinkNode_ConditionalIsStored.cs" />
+    <Compile Include="Drone\ThinkNode_ConditionalNearController.cs" />
+    <Compile Include="Drone\ThinkNode_ConditionalNoController.cs" />
+    <Compile Include="Drone\ThinkNode_ConditionalShouldReturnToController.cs" />
     <Compile Include="Mod_RimNet.cs" />
     <Compile Include="UI\GUIExtensions.cs" />
     <Compile Include="UI\Modules\Module_CompFlickable.cs" />
@@ -146,8 +180,6 @@
     <Compile Include="UI\Modules\Module_CompPowerTrader.cs" />
     <Compile Include="UI\Modules\Module_CompTempControl.cs" />
     <Compile Include="UI\Modules\Module_CompTurret.cs" />
-    <Compile Include="netowrk\NetworkCommandDef.cs" />
-    <Compile Include="netowrk\NetworkCommandWorker.cs" />
     <Compile Include="netowrk\NetworkMessage.cs" />
     <Compile Include="UI\Modules\NetworkUIModule.cs" />
     <Compile Include="UI\NetworkUIModuleRegistry.cs" />
@@ -168,6 +200,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="DataNet\Util\" />
     <Folder Include="Interfaces\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

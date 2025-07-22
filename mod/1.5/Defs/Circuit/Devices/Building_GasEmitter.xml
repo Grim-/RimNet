@@ -6,23 +6,18 @@
     <description>A vent for equalizing the temperature between two rooms without allowing people to walk between them.</description>
     <thingClass>Building</thingClass>
     <graphicData>
-      <texPath>Things/Building/Misc/TempControl/Vent</texPath>
-      <graphicClass>Graphic_Multi</graphicClass>
-      <damageData>
-        <cornerTL>Damage/Corner</cornerTL>
-        <cornerTR>Damage/Corner</cornerTR>
-        <cornerBL>Damage/Corner</cornerBL>
-        <cornerBR>Damage/Corner</cornerBR>
-      </damageData>
+      <texPath>GasVent</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <shaderType>CutoutComplex</shaderType>
     </graphicData>
     <altitudeLayer>Building</altitudeLayer>
-    <passability>Impassable</passability>
-    <blockWind>true</blockWind>
-    <fillPercent>1</fillPercent>
+    <passability>Standable</passability>
+    <blockWind>false</blockWind>
+    <fillPercent>0.1</fillPercent>
     <coversFloor>true</coversFloor>
-    <blockLight>true</blockLight>
-    <blockWeather>true</blockWeather>
-    <castEdgeShadows>true</castEdgeShadows>
+    <blockLight>false</blockLight>
+    <blockWeather>false</blockWeather>
+    <castEdgeShadows>false</castEdgeShadows>
     <canOverlapZones>false</canOverlapZones>
     <staticSunShadowHeight>1.0</staticSunShadowHeight>
     <statBases>
@@ -30,15 +25,11 @@
       <MaxHitPoints>100</MaxHitPoints>
       <Flammability>1.0</Flammability>
     </statBases>
-    <tickerType>Rare</tickerType>
+    <tickerType>Normal</tickerType>
     <costList>
       <Steel>30</Steel>
     </costList>
     <terrainAffordanceNeeded>Medium</terrainAffordanceNeeded>
-    <placeWorkers>
-      <li>PlaceWorker_Vent</li>
-    </placeWorkers>
-    <drawPlaceWorkersWhileSelected>true</drawPlaceWorkersWhileSelected>
     <building>
       <canPlaceOverWall>true</canPlaceOverWall>
     </building>
@@ -54,9 +45,9 @@
         <commandDescKey>CommandDesignateOpenCloseVentDesc</commandDescKey>
       </li>
       <li Class="RimNet.CompProperties_GasEmitter">
-        <gasType>BlindSmoke</gasType>
-
+        <gasType>ToxGas</gasType>
       </li>
+      <li Class="RimNet.CompProperties_SignalFlicker" />
     </comps>
   </ThingDef>
 

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThingDef ParentName="BaseDrone">
+    <defName>RimNet_DroneBasic</defName>
+    <label>basic drone</label>
+    <description>A small drone used for defense and situation control. The drone injects a small amount of paralytic biotoxin, stunning organic targets. While designed to be non-lethal, wasps may occasionally kill their target by accident. Wasps are powered by a long-lasting battery.</description>
+    <thingClass>RimNet.Drone</thingClass>
+    <statBases>
+      <MoveSpeed>5.8</MoveSpeed>
+      <MaxFlightTime>0</MaxFlightTime>
+    </statBases>
+    <race>
+      <thinkTreeMain>BasicDroneCoreTree</thinkTreeMain>
+      <thinkTreeConstant>CombatDroneThinkTree</thinkTreeConstant>
+      <baseHealthScale>0.35</baseHealthScale>
+      <baseBodySize>0.25</baseBodySize>
+      <hasCorpse>true</hasCorpse>
+      <lifeStageAges>
+        <li>
+          <def>MechanoidFullyFormed</def>
+          <minAge>0</minAge>
+          <soundWounded>Pawn_Wasp_Wounded</soundWounded>
+          <soundDeath>Pawn_Wasp_Death</soundDeath>
+          <soundCall>Pawn_Wasp_Call</soundCall>
+        </li>
+      </lifeStageAges>
+    </race>
+    <butcherProducts>
+      <Steel>5</Steel>
+    </butcherProducts>
+    <tools Inherit="False">
+      <li>
+        <label>stinger</label>
+        <capacities>
+          <li>Stab</li>
+        </capacities>
+        <power>6</power>
+        <cooldownTime>2.4</cooldownTime>
+        <linkedBodyPartsGroup>SpikedShellAttackTool</linkedBodyPartsGroup>
+        <ensureLinkedBodyPartsGroupAlwaysUsable>true</ensureLinkedBodyPartsGroupAlwaysUsable>
+        <extraMeleeDamages>
+        </extraMeleeDamages>
+      </li>
+    </tools>
+  </ThingDef>
+
+  <PawnKindDef ParentName="BaseDroneKind">
+    <defName>RimNet_DroneBasickind</defName>
+    <label>basic drone</label>
+    <labelPlural>drones</labelPlural>
+    <race>RimNet_DroneBasic</race>
+    <combatPower>25</combatPower>
+    <lifeStages>
+      <li>
+        <bodyGraphicData>
+          <texPath>Things/Pawn/Drone/Wasp/WaspDrone</texPath>
+          <drawSize>0.95</drawSize>
+        </bodyGraphicData>
+      </li>
+    </lifeStages>
+  </PawnKindDef>
+</Defs>

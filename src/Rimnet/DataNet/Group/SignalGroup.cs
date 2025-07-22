@@ -45,16 +45,23 @@ namespace RimNet
             DiscoverGroup(owner);
         }
 
-
-
         public void SelectBestOwner()
         {
             //a node that is connected to something other than other nodes of the same type
             Comp_SignalNode newBestNode = AllNodes.Where(x => x.AllConnectedPorts.Any(y => y.ConnectedNode.GetType() != ownerNode.GetType())).FirstOrDefault();
             if (newBestNode != null)
             {
-                ownerNode = newBestNode;
-                ownerThing = newBestNode.parent;    
+                PromoteToOwner(newBestNode);
+            }
+        }
+
+
+        public void PromoteToOwner(Comp_SignalNode newOwner)
+        {
+            if (connectedNodes.Contains(newOwner))
+            {
+                ownerNode = newOwner;
+                ownerThing = newOwner.parent;
             }
         }
 
@@ -128,13 +135,8 @@ namespace RimNet
                 }
             }
 
-
-            SelectBestOwner();
+            OnGroupChange();
         }
-
-        /// <summary>
-        /// Absorbs all nodes from another group into this one, making this group dominant.
-        /// </summary>
         public void MergeGroup(SignalGroup otherGroup)
         {
             var nodesToMerge = new List<Comp_SignalNode>(otherGroup.ConnectedNodes);
@@ -144,14 +146,29 @@ namespace RimNet
                 node.JoinSignalGroup(this);
             }
 
-            SelectBestOwner();
+            OnGroupChange();
         }
 
         public void LeaveGroup(Comp_SignalNode node)
         {
             connectedNodes.Remove(node);
+            OnGroupChange();
+        }
 
+        protected void OnGroupChange()
+        {
             SelectBestOwner();
+        }
+
+        public void SyncGroup(Comp_SignalNode senderNode)
+        {
+            foreach (var item in AllNodes)
+            {
+                if (item != senderNode)
+                {
+                    item.SyncWithGroupNode(senderNode);
+                }    
+            }
         }
 
         public bool IsPartOfGroup(Comp_SignalNode signalNode)
@@ -171,8 +188,16 @@ namespace RimNet
                 action(node, signal);
             }
         }
-
-
+        public void PropagateSignal(Signal signal, Comp_SignalNode originator)
+        {
+            foreach (var node in AllNodes)
+            {
+                if (node != originator)
+                {
+                    node.OnGroupSignalReceived(signal, this);
+                }
+            }
+        }
         public bool CanJoinGroup(Comp_SignalNode signalNode)
         {
             if (!IsPartOfGroup(signalNode) && signalNode.GetType() == ownerNode.GetType())
@@ -181,7 +206,6 @@ namespace RimNet
             }
             return false;
         }
-
 
         public void ExposeData()
         {
