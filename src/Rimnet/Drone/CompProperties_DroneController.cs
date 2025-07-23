@@ -19,8 +19,21 @@ namespace RimNet
     {
         public List<Drone> activeDrones = new List<Drone>();
         private ThingOwner<Drone> storedDrones;
+
+        public List<Drone> StoredDrones => storedDrones.InnerListForReading;
         public int maxDrones = 5;
         public float costPerDronePerTick = 0.01f;
+
+        public HashSet<Drone> AllDrones
+        {
+            get
+            {
+                HashSet<Drone> drones = new HashSet<Drone>();
+                drones.AddRange(activeDrones);
+                drones.AddRange(storedDrones);
+                return drones;
+            }
+        }
 
 
         public float TotalMaintenaceCostPerTick => activeDrones.Count * costPerDronePerTick;
@@ -50,7 +63,7 @@ namespace RimNet
 
         public CompDroneController()
         {
-            storedDrones = new ThingOwner<Drone>(this, true, LookMode.Deep);
+            storedDrones = new ThingOwner<Drone>(this, false, LookMode.Deep);
         }
 
         public override void CompTick()
@@ -122,26 +135,22 @@ namespace RimNet
                 return false;
             }
 
+            if (!storedDrones.InnerListForReading.Any())
+            {
+                return false;
+            }
+
             IntVec3 spawnPos = CellFinder.RandomClosewalkCellNear(parent.Position, parent.Map, 3);
             if (!spawnPos.IsValid)
             {
                 return false;
             }
 
-            Drone droneToDeploy;
-            if (storedDrones.InnerListForReading.Any())
-            {
-                droneToDeploy = storedDrones.InnerListForReading.First();
-                storedDrones.Remove(droneToDeploy);
-            }
-            else
-            {
-                droneToDeploy = (Drone)PawnGenerator.GeneratePawn(Props.droneDef, this.parent.Faction);
-                droneToDeploy.controller = this;
-            }
+            Drone droneToDeploy = storedDrones.InnerListForReading.First();
+            storedDrones.Remove(droneToDeploy);
 
             GenSpawn.Spawn(droneToDeploy, spawnPos, parent.Map);
-
+            Log.Message($"Deployed {droneToDeploy.Label}");
             droneToDeploy.DroneState = DroneState.ACTIVE;
             activeDrones.Add(droneToDeploy);
             return true;
@@ -149,12 +158,27 @@ namespace RimNet
 
         public void StoreDrone(Drone drone)
         {
-            if (drone == null || !drone.Spawned || !activeDrones.Contains(drone))
+            if (drone == null)
                 return;
 
-            activeDrones.Remove(drone);
-            drone.DeSpawn();
-            storedDrones.TryAdd(drone);           
+            Log.Message($"Storing {drone.Label}");
+
+            if (activeDrones.Contains(drone))
+            {
+                activeDrones.Remove(drone);
+            }
+
+            if (drone.Spawned)
+            {
+                drone.DeSpawn();
+            }
+
+            if (!storedDrones.TryAdd(drone, false))
+            {
+
+            }
+
+                       
         }
 
 
@@ -192,7 +216,7 @@ namespace RimNet
             base.PostExposeData();
             Scribe_Collections.Look(ref activeDrones, "activeDrones", LookMode.Reference);
             Scribe_Deep.Look(ref storedDrones, "storedDrones", this);
-
+            Scribe_Values.Look(ref _IsActive, "_IsActive");
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 if (activeDrones == null) activeDrones = new List<Drone>();

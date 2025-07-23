@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThingDef ParentName="RimNetBaseDrone">
+    <defName>RimNet_BasicRepairDrone</defName>
+    <label>basic repair drone</label>
+    <description>A small drone used for defense and situation control. The drone injects a small amount of paralytic biotoxin, stunning organic targets. While designed to be non-lethal, wasps may occasionally kill their target by accident. Wasps are powered by a long-lasting battery.</description>
+    <race>
+      <thinkTreeMain>BasicDroneCoreTree</thinkTreeMain>
+      <thinkTreeConstant>RepairDroneThinkTree</thinkTreeConstant>
+      <baseHealthScale>0.35</baseHealthScale>
+      <baseBodySize>0.25</baseBodySize>
+      <hasCorpse>true</hasCorpse>
+    </race>
+    <statBases>
+      <WorkSpeedGlobal>0.5</WorkSpeedGlobal>
+      <MiningSpeed>0.3</MiningSpeed>
+    </statBases>
+    <butcherProducts>
+      <Steel>5</Steel>
+    </butcherProducts>
+    <tools Inherit="False">
+      <li>
+        <label>laser</label>
+        <capacities>
+          <li>Stab</li>
+        </capacities>
+        <power>2</power>
+        <cooldownTime>5</cooldownTime>
+        <linkedBodyPartsGroup>SpikedShellAttackTool</linkedBodyPartsGroup>
+        <ensureLinkedBodyPartsGroupAlwaysUsable>true</ensureLinkedBodyPartsGroupAlwaysUsable>
+        <extraMeleeDamages>
+        </extraMeleeDamages>
+      </li>
+    </tools>
+  </ThingDef>
+
+  <ThingDef ParentName="ResourceBase">
+    <defName>RimNet_BasicRepairDrone_Disassembled</defName>
+    <label>basic repair drone</label>
+    <thingClass>ThingWithComps</thingClass>
+    <description>A decommissioned repair drone</description>
+    <graphicData>
+      <texPath>Things/Pawn/Drone/Wasp/WaspDrone_south</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+    </graphicData>
+    <resourceReadoutPriority>Middle</resourceReadoutPriority>
+    <stackLimit>1</stackLimit>
+    <useHitPoints>true</useHitPoints>
+    <statBases>
+      <MarketValue>1000</MarketValue>
+      <MaxHitPoints>100</MaxHitPoints>
+      <Mass>2.0</Mass>
+      <Flammability>0.2</Flammability>
+    </statBases>
+    <recipeMaker>
+      <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
+      <effectWorking>Cook</effectWorking>
+      <soundWorking>Recipe_Machining</soundWorking>
+      <workAmount>800</workAmount>
+      <targetCountAdjustment>5</targetCountAdjustment>
+      <workSkill>Crafting</workSkill>
+      <recipeUsers>
+        <li>TableMachining</li>
+      </recipeUsers>
+      <skillRequirements>
+        <Crafting>4</Crafting>
+      </skillRequirements>
+      <displayPriority>100</displayPriority>
+    </recipeMaker>
+    <thingCategories>
+      <li>ItemsMisc</li>
+      <li>Drones</li>
+    </thingCategories>
+    <tradeability>Sellable</tradeability>
+    <techLevel>Ultra</techLevel>
+    <tradeTags>
+      <li>ExoticMisc</li>
+    </tradeTags>
+    <comps>
+      <li Class="RimNet.CompProperties_DroneComp">
+        <dronePawnKind>RimNet_BasicRepairDrone</dronePawnKind>
+      </li>
+    </comps>
+    <thingSetMakerTags>
+      <li>RewardStandardCore</li>
+    </thingSetMakerTags>
+  </ThingDef>
+
+
+  <PawnKindDef ParentName="BaseDroneKind">
+    <defName>RimNet_BasicRepairDrone</defName>
+    <label>basic repair drone</label>
+    <labelPlural>repair drones</labelPlural>
+    <race>RimNet_BasicRepairDrone</race>
+    <combatPower>0</combatPower>
+    <lifeStages>
+      <li>
+        <bodyGraphicData>
+          <texPath>Things/Pawn/Drone/Wasp/WaspDrone</texPath>
+          <drawSize>0.95</drawSize>
+        </bodyGraphicData>
+      </li>
+    </lifeStages>
+  </PawnKindDef>
+
+  <RecipeDef ParentName="BaseDroneRecipe">
+    <defName>RimNet_BasicRepairDroneRecipe</defName>
+    <label>manufacture repair drone</label>
+    <description>Gestate a repair drone.</description>
+    <products>
+      <RimNet_BasicRepairDrone_Disassembled>1</RimNet_BasicRepairDrone_Disassembled>
+    </products>
+    <descriptionHyperlinks>
+      <ThingDef>RimNet_BasicRepairDrone_Disassembled</ThingDef>
+    </descriptionHyperlinks>
+  </RecipeDef>
+
+</Defs>

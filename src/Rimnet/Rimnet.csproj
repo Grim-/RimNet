@@ -99,6 +99,7 @@
     <Compile Include="Conveyor\TrainTrackNetwork.cs" />
     <Compile Include="DataNet\Sensors\CompProperties_SignalDelayNode.cs" />
     <Compile Include="DataNet\UI\ITab_SignalDelayNode.cs" />
+    <Compile Include="Drone\CompProperties_DroneComp.cs" />
     <Compile Include="Drone\CompProperties_DroneController.cs" />
     <Compile Include="Drone\Drone.cs" />
     <Compile Include="DataNet\Sensors\CompProperties_SensorWeather.cs" />
@@ -147,7 +148,10 @@
     <Compile Include="DataNet\UI\Window_SignalGroup.cs" />
     <Compile Include="DataNet\Signal\SignalPortType.cs" />
     <Compile Include="DataNet\Base\SpatialNodeData.cs" />
+    <Compile Include="Drone\ITab_DroneController.cs" />
+    <Compile Include="Drone\JobDriver_InstallDrone.cs" />
     <Compile Include="Drone\JobDriver_StoreSelfInController.cs" />
+    <Compile Include="Drone\JobGiver_FixBreakdownsDrone.cs" />
     <Compile Include="Drone\JobGiver_GotoController.cs" />
     <Compile Include="Drone\JobGiver_StoreInController.cs" />
     <Compile Include="Drone\ThinkNode_ConditionalInCombat.cs" />
@@ -158,6 +162,7 @@
     <Compile Include="Drone\ThinkNode_ConditionalNearController.cs" />
     <Compile Include="Drone\ThinkNode_ConditionalNoController.cs" />
     <Compile Include="Drone\ThinkNode_ConditionalShouldReturnToController.cs" />
+    <Compile Include="Drone\WorkGiver_InstallDrone.cs" />
     <Compile Include="Mod_RimNet.cs" />
     <Compile Include="UI\GUIExtensions.cs" />
     <Compile Include="UI\Modules\Module_CompFlickable.cs" />

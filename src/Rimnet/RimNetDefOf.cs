@@ -10,5 +10,8 @@ namespace RimNet
         public static TrackTypeDef TrainTrack;
 
         public static JobDef StoreSelfInController;
+        public static JobDef InstallDrone;
+
+        public static ThingCategoryDef Drones;
     }
 }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <RecipeDef Name="BaseDroneRecipe" Abstract="True">
+    <jobString>manufacturing mech.</jobString>
+    <workAmount>1800</workAmount>
+    <gestationCycles>1</gestationCycles>
+    <formingTicks>120000</formingTicks>
+    <mechanitorOnlyRecipe>true</mechanitorOnlyRecipe>
+    <workSpeedStat>MechFormingSpeed</workSpeedStat>
+    <soundWorking>MechGestatorCycle_Initiating</soundWorking>
+    <researchPrerequisite>BasicMechtech</researchPrerequisite>
+    <ingredients>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>Steel</li>
+          </thingDefs>
+        </filter>
+        <count>50</count>
+      </li>
+    </ingredients>
+    <displayPriority>100</displayPriority>
+  </RecipeDef>
+</Defs>

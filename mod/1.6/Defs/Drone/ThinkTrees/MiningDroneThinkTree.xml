@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThinkTreeDef>
+    <defName>MiningDroneThinkTree</defName>
+    <thinkRoot Class="ThinkNode_Priority">
+      <subNodes>
+
+        <li Class="ThinkNode_ConditionalCanDoConstantThinkTreeJobNow">
+          <subNodes>
+
+            <li Class="RimNet.ThinkNode_ConditionalIsDroneState">
+              <invert>true</invert>
+              <stateToCheck>RETURNING</stateToCheck>
+              <subNodes>
+                <li Class="ThinkNode_Tagger">
+                  <tagToGive>Fieldwork</tagToGive>
+                  <subNodes>
+                    <li Class="JobGiver_Mine">
+                    </li>
+                  </subNodes>
+                </li>
+              </subNodes>
+            </li>
+          </subNodes>
+        </li>
+
+      </subNodes>
+    </thinkRoot>
+  </ThinkTreeDef>
+</Defs>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <JobDef>
+    <defName>InstallDrone</defName>
+    <driverClass>RimNet.JobDriver_InstallDrone</driverClass>
+    <reportString>Installing drone...</reportString>
+  </JobDef>
+</Defs>

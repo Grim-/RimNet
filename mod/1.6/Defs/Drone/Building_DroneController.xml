@@ -37,11 +37,13 @@
           <alwaysDisplayAsUsingPower>true</alwaysDisplayAsUsingPower>
         </li>
         <li Class="RimNet.CompProperties_DroneController">
-          <droneDef>RimNet_DroneBasickind</droneDef>
+          <droneDef>RimNet_BasicMiningDrone</droneDef>
         </li>
       </comps>
+      <inspectorTabs>
+        <li>RimNet.ITab_DroneController</li>
+      </inspectorTabs>
       <placeWorkers>
-        <li>PlaceWorker_NotUnderRoof</li>
       </placeWorkers>
       <building>
         <destroySound>BuildingDestroyed_Metal_Small</destroySound>

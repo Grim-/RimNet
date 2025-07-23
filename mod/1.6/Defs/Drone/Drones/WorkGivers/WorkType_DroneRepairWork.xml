@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <WorkTypeDef>
+    <defName>RepairDroneWork</defName>
+    <label>repair</label>
+    <gerundLabel>repairing</gerundLabel>
+    <pawnLabel>repair drone</pawnLabel>
+    <naturalPriority>50</naturalPriority>
+    <workTags>ManualSkilled</workTags>
+    <workGiversByPriority>
+      <li>FixBrokenDownBuilding</li>
+    </workGiversByPriority>
+  </WorkTypeDef>
+
+</Defs>
