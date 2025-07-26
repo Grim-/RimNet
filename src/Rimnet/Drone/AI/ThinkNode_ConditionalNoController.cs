@@ -8,7 +8,7 @@ namespace RimNet
         protected override bool Satisfied(Pawn pawn)
         {
             var drone = pawn as Drone;
-            return drone?.controller == null || drone.controller.parent.Destroyed;
+            return drone?.Controller == null || drone.Controller.parent.Destroyed;
         }
     }
 }

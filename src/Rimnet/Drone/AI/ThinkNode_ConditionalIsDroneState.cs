@@ -10,7 +10,7 @@ namespace RimNet
         protected override bool Satisfied(Pawn pawn)
         {
             var drone = pawn as Drone;
-            return drone?.controller != null && drone.DroneState == stateToCheck;
+            return drone?.Controller != null && drone.DroneState == stateToCheck;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,141 +11,181 @@ namespace RimNet
     {
         private Vector2 scrollPosition;
 
-        // Constants for layout
-        private const float BoxSize = 80f;
-        private const float Padding = 10f;
-        private const float GridPadding = 20f;
-        private const float LabelHeight = 30f;
-        private const int ItemsPerRow = 4;
+        // --- Constants for new row-based layout ---
+        private const float RowHeight = 60f;
+        private const float RowPadding = 8f;
+        private const float HeaderHeight = 30f;
+        private const float SectionPadding = 15f;
         private const float ScrollBarWidth = 16f;
 
         public ITab_DroneController()
         {
             this.labelKey = "DroneControllerTab";
-            this.size = new Vector2(500f, 400f);
+            this.size = new Vector2(520f, 450f);
             this.scrollPosition = Vector2.zero;
         }
 
         public CompDroneController DroneComp => SelThing.TryGetComp<CompDroneController>();
 
+        /// <summary>
+        /// Main method to draw the tab's content.
+        /// </summary>
         protected override void FillTab()
         {
-            var activeDrones = DroneComp.activeDrones;
+            ExpanseUI.BeginExpanseStyle();
+            Rect mainRect = new Rect(0f, 0f, size.x, size.y).ContractedBy(4f);
+            Rect contentRect = mainRect.ContractedBy(RowPadding);
+            var activeDrones = DroneComp.ActiveDrones;
             var storedDrones = DroneComp.StoredDrones;
-
-            float totalContentHeight = 0f;
-            int activeRows = activeDrones.Any() ? Mathf.CeilToInt(activeDrones.Count / (float)ItemsPerRow) : 0;
-            int storedRows = storedDrones.Any() ? Mathf.CeilToInt(storedDrones.Count / (float)ItemsPerRow) : 0;
-
-            if (activeRows > 0)
-            {
-                totalContentHeight += LabelHeight + (activeRows * (BoxSize + Padding));
-            }
-            if (storedRows > 0)
-            {
-                if (totalContentHeight > 0) totalContentHeight += GridPadding;
-                totalContentHeight += LabelHeight + (storedRows * (BoxSize + Padding));
-            }
-            if (totalContentHeight > 0) totalContentHeight -= Padding;
-
-            // --- ScrollView and Content Drawing ---
-            Rect rect = new Rect(0f, 0f, size.x, size.y).ContractedBy(10f);
-            Rect viewRect = new Rect(0f, 0f, rect.width - ScrollBarWidth, totalContentHeight); 
-
-            Widgets.BeginScrollView(rect, ref scrollPosition, viewRect);
-
-            float currentY = 0f;
-
-            // --- Active Drones Grid ---
+            float totalContentHeight = 58f;
             if (activeDrones.Any())
             {
-                DrawDroneGrid(activeDrones, activeRows, "Active", ref viewRect, ref currentY);
+                totalContentHeight += HeaderHeight + (activeDrones.Count * (RowHeight + RowPadding));
+            }
+            if (storedDrones.Any())
+            {
+                if (totalContentHeight > 0) totalContentHeight += SectionPadding;
+                totalContentHeight += HeaderHeight + (storedDrones.Count * (RowHeight + RowPadding));
+            }
+            Rect viewRect = new Rect(0f, 0f, contentRect.width - ScrollBarWidth, totalContentHeight);
+            Widgets.BeginScrollView(contentRect, ref scrollPosition, viewRect);
+            float currentY = 0f;
+            Rect headerRect = new Rect(0, currentY, contentRect.width - ScrollBarWidth, 40f);
+            currentY += 48f;
+
+            ExpanseUI.DrawAngularPanel(headerRect, new Color(0.72f, 0.75f, 0.73f, 0.3f), ExpanseUI.Gray.SetAlpha(0.3f));
+            float buttonWidth = headerRect.width / 3f;
+
+            Rect deployAllButton = new Rect(headerRect.x, headerRect.y, buttonWidth, headerRect.height);
+            if (ExpanseUI.DrawButton(deployAllButton, "DEPLOY ALL", ExpanseUI.Blue))
+            {
+                DroneComp.DeployDrones();
+            }
+            Rect returnAllButton = new Rect(headerRect.x + buttonWidth, headerRect.y, buttonWidth, headerRect.height);
+            if (ExpanseUI.DrawButton(returnAllButton, "RETURN ALL", ExpanseUI.ExpanseOrange))
+            {
+                DroneComp.ReturnDrones();
+            }
+            Rect ejectAllButton = new Rect(headerRect.x + buttonWidth * 2f, headerRect.y, buttonWidth, headerRect.height);
+            if (ExpanseUI.DrawButton(ejectAllButton, "EJECT ALL", ExpanseUI.Red))
+            {
+                DroneComp.EjectDrones();
+            }
+            if (activeDrones.Any())
+            {
+                DrawDroneList(activeDrones, "Active Drones", ref currentY, viewRect.width);
             }
 
-            // --- Stored Drones Grid ---
+            currentY += 8f;
+
             if (storedDrones.Any())
             {
                 if (activeDrones.Any())
                 {
-                    currentY += GridPadding;
+                    currentY += SectionPadding;
+                }
+                DrawDroneList(storedDrones, "Stored Drones", ref currentY, viewRect.width);
+            }
+            Widgets.EndScrollView();
+            ExpanseUI.EndExpanseStyle();
+        }
+
+        private void DrawDroneList(List<Drone> drones, string label, ref float currentY, float viewWidth)
+        {
+            Rect headerRect = new Rect(0f, currentY, viewWidth, HeaderHeight);
+            ExpanseUI.DrawHeader(headerRect, label.ToUpper(), ExpanseUI.Blue);
+            currentY += HeaderHeight + RowPadding / 2;
+
+            foreach (var drone in drones.ToArray())
+            {
+                Rect rowRect = new Rect(0f, currentY, viewWidth, RowHeight);
+                DrawDroneRow(rowRect, drone);
+                currentY += RowHeight + RowPadding;
+            }
+        }
+
+        private void DrawDroneRow(Rect rowRect, Drone drone)
+        {
+            Color rowColor = Mouse.IsOver(rowRect) ? ExpanseUI.Gray : ExpanseUI.DarkGray;
+            ExpanseUI.DrawAngularPanel(rowRect, rowColor.SetAlpha(0.4f), ExpanseUI.Gray);
+            TooltipHandler.TipRegion(rowRect, drone.GetTooltip());
+
+            Rect contentRect = rowRect.ContractedBy(4f);
+            Rect leftPart = contentRect.LeftPartPixels(RowHeight - 8f);
+            Rect middlePart = new Rect(leftPart.xMax + 5, contentRect.y, contentRect.width - leftPart.width - 130f, contentRect.height);
+            Rect rightPart = contentRect.RightPartPixels(170f);
+
+            Rect portraitRect = leftPart.ContractedBy(2f);
+
+
+            if (drone.IsDeployed && Mouse.IsOver(portraitRect))
+            {
+                Find.CameraDriver.JumpToCurrentMapLoc(drone.Position);
+            }
+
+            ExpanseUI.DrawAngularPanel(portraitRect, Color.black, ExpanseUI.Gray);
+            Widgets.DrawTextureFitted(portraitRect.ContractedBy(2f), PortraitsCache.Get(drone, new Vector2(portraitRect.width, portraitRect.height), Rot4.South), 1f);
+
+            float nameHeight = middlePart.height * 0.5f;
+            float statusHeight = middlePart.height * 0.5f;
+
+            Rect nameRect = new Rect(middlePart.x, middlePart.y, middlePart.width, nameHeight);
+            ExpanseUI.DrawFontLabel(nameRect, drone.LabelCap, GameFont.Small, TextAnchor.MiddleLeft);
+
+            Rect statusRect = new Rect(middlePart.x, middlePart.y + nameHeight, middlePart.width / 2, statusHeight);
+            string statusLabel = drone.DroneState.ToString().ToUpper();
+
+            ExpanseUI.BeginExpanseStyle();
+            Widgets.Label(statusRect, "STATUS: " + statusLabel);
+            ExpanseUI.EndExpanseStyle();
+
+            Rect healthRect = new Rect(statusRect.xMax - 10, middlePart.y + nameHeight + 2, 100, statusHeight - 4);
+            float healthPct = drone.health.summaryHealth.SummaryHealthPercent;
+            ExpanseUI.DrawProgressBar(healthRect, healthPct, ExpanseUI.GetPercentageColor(healthPct), default(Color), true, TextAnchor.MiddleCenter);
+
+            if (drone.IsDeployed)
+            {
+                float widthPerButton = rightPart.width / 3;
+
+                Rect locateButtonRect = new Rect(rightPart.x, rightPart.y, widthPerButton, rightPart.height);
+                if (ExpanseUI.DrawButton(locateButtonRect, "SELECT", ExpanseUI.Blue))
+                {
+                    foreach (var item in Find.Selector.SelectedObjects.ToArray())
+                    {
+                        Find.Selector.Deselect(item);
+                    }
+                    Find.Selector.Select(drone);
                 }
 
-                DrawDroneGrid(storedDrones, activeRows, "Stored", ref viewRect, ref currentY);
+                Rect returnButtonRect = new Rect(locateButtonRect.xMax + 4, rightPart.y, widthPerButton, rightPart.height);
+                if (ExpanseUI.DrawButton(returnButtonRect, "RETURN", ExpanseUI.Orange))
+                {
+                    drone.TryStartReturn();
+                }
+
+                Rect toggleStateButton = new Rect(returnButtonRect.xMax + 4, rightPart.y, widthPerButton, rightPart.height);
+                if (ExpanseUI.DrawButton(toggleStateButton, drone.IsEnabled ? "DISABLE" : "ENABLE", drone.IsEnabled ? ExpanseUI.Green : ExpanseUI.Orange))
+                {
+                    if (drone.IsEnabled)
+                    {
+                        drone.Disable();
+                    }
+                    else drone.Enable();
+                }
             }
-
-            Widgets.EndScrollView();
-        }
-
-        //private float DrawStoredDrones(List<Drone> storedDrones, Rect viewRect, float currentY)
-        //{
-        //    // Grid Label
-        //    Rect storedLabelRect = new Rect(0f, currentY, viewRect.width, LabelHeight);
-        //    Text.Font = GameFont.Medium;
-        //    Widgets.Label(storedLabelRect, "Stored Drones");
-        //    Text.Font = GameFont.Small;
-        //    currentY += LabelHeight;
-
-        //    // Grid Content
-        //    for (int i = 0; i < storedDrones.Count; i++)
-        //    {
-        //        Drone drone = storedDrones[i];
-        //        int row = i / ItemsPerRow;
-        //        int col = i % ItemsPerRow;
-        //        float x = col * (BoxSize + Padding);
-        //        float y = currentY + row * (BoxSize + Padding);
-        //        Rect boxRect = new Rect(x, y, BoxSize, BoxSize);
-
-        //        DrawDrone(drone, boxRect);
-        //    }
-
-        //    return currentY;
-        //}
-
-        private void DrawDroneGrid(List<Drone> activeDrones, int activeRows, string gridLabel, ref Rect viewRect, ref float currentY)
-        {
-            // Grid Label
-            Rect activeLabelRect = new Rect(0f, currentY, viewRect.width, LabelHeight);
-            Text.Font = GameFont.Medium;
-            Widgets.Label(activeLabelRect, gridLabel);
-            Text.Font = GameFont.Small;
-            currentY += LabelHeight;
-
-            for (int i = 0; i < activeDrones.Count; i++)
+            else
             {
-                int row = i / ItemsPerRow;
-                int col = i % ItemsPerRow;
-                float x = col * (BoxSize + Padding);
-                float y = currentY + row * (BoxSize + Padding);
-                Rect boxRect = new Rect(x, y, BoxSize, BoxSize);
-                DrawDrone(activeDrones[i], boxRect);
-            }
-            currentY += activeRows * (BoxSize + Padding);
-        }
+                Rect deployButtonRect = new Rect(rightPart.x, rightPart.y, rightPart.width / 2 - 2, rightPart.height);
+                if (ExpanseUI.DrawButton(deployButtonRect, "DEPLOY", ExpanseUI.Green))
+                {
+                    DroneComp.TryDeployDrone(drone);
+                }
 
-        private void DrawDrone(Drone drone, Rect boxRect)
-        {
-            Widgets.DrawBoxSolidWithOutline(boxRect, Color.grey, GetStatusColor(drone));
-
-            Rect portraitRect = new Rect(boxRect.x + 5f, boxRect.y + 5f, 70f, 50f);
-            Widgets.DrawTextureFitted(portraitRect, PortraitsCache.Get(drone, new Vector2(70f, 50f), default), 2f);
-
-            Rect labelRect = new Rect(boxRect.x, boxRect.y + 55f, BoxSize, 20f);
-            Widgets.DrawBoxSolidWithOutline(boxRect, Color.clear, Color.white);
-            Text.Anchor = TextAnchor.MiddleCenter;
-            Widgets.Label(labelRect, drone.DroneState.ToString());
-            Text.Anchor = TextAnchor.UpperLeft;
-        }
-
-        private Color GetStatusColor(Drone drone)
-        {
-            switch (drone.DroneState)
-            {
-                case DroneState.ACTIVE:
-                    return Color.green;
-                case DroneState.RETURNING:
-                    return Color.red;
-                default:
-                    return Color.white;
+                Rect ejectButtonRect = new Rect(deployButtonRect.xMax + 4, rightPart.y, rightPart.width / 2 - 2, rightPart.height);
+                if (ExpanseUI.DrawButton(ejectButtonRect, "EJECT", ExpanseUI.Red))
+                {
+                    DroneComp.EjectDrone(drone);
+                }
             }
         }
     }

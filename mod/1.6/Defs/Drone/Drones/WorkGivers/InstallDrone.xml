@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
-  <WorkGiverDef>
+  <!-- <WorkGiverDef>
     <defName>InstallDroneGiver</defName>
     <giverClass>RimNet.WorkGiver_InstallDrone</giverClass>
     <workType>Crafting</workType>
     <priorityInType>70</priorityInType>
     <verb>install drone</verb>
-  </WorkGiverDef>
+  </WorkGiverDef> -->
 </Defs>

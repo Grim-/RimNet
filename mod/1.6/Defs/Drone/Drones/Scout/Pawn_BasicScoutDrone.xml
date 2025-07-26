@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ThingDef ParentName="RimNetBaseDrone">
+    <defName>RimNet_BasicScoutDrone</defName>
+    <label>basic scout drone</label>
+    <description>A small drone used for defense and situation control. The drone injects a small amount of paralytic biotoxin, stunning organic targets. While designed to be non-lethal, wasps may occasionally kill their target by accident. Wasps are powered by a long-lasting battery.</description>
+    <race>
+      <thinkTreeMain>BasicDroneCoreTree</thinkTreeMain>
+      <thinkTreeConstant>CombatDroneThinkTree</thinkTreeConstant>
+      <baseHealthScale>0.35</baseHealthScale>
+      <baseBodySize>0.25</baseBodySize>
+      <hasCorpse>true</hasCorpse>
+    </race>
+    <butcherProducts>
+      <Steel>5</Steel>
+    </butcherProducts>
+    <tools Inherit="False">
+      <li>
+        <label>laser</label>
+        <capacities>
+          <li>Stab</li>
+        </capacities>
+        <power>2</power>
+        <cooldownTime>5</cooldownTime>
+        <linkedBodyPartsGroup>SpikedShellAttackTool</linkedBodyPartsGroup>
+        <ensureLinkedBodyPartsGroupAlwaysUsable>true</ensureLinkedBodyPartsGroupAlwaysUsable>
+        <extraMeleeDamages>
+        </extraMeleeDamages>
+      </li>
+    </tools>
+    <comps>
+      <li Class="RimNet.CompProperties_DronePowerSource">
+      </li>
+      <li Class="RimNet.CompProperties_DroneComp">
+        <disassembledKind>RimNet_BasicScoutDrone_Disassembled</disassembledKind>
+      </li>
+    </comps>
+  </ThingDef>
+
+  <PawnKindDef ParentName="BaseDroneKind">
+    <defName>RimNet_BasicScoutDrone</defName>
+    <label>basic scout drone</label>
+    <labelPlural>scouting drones</labelPlural>
+    <race>RimNet_BasicScoutDrone</race>
+    <combatPower>25</combatPower>
+    <lifeStages>
+      <li>
+        <bodyGraphicData>
+          <texPath>Things/Pawn/Drone/Hunter/HunterDrone</texPath>
+          <drawSize>0.95</drawSize>
+        </bodyGraphicData>
+      </li>
+    </lifeStages>
+  </PawnKindDef>
+
+</Defs>

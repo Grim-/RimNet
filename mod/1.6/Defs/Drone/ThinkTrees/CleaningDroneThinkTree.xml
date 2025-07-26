@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
   <ThinkTreeDef>
-    <defName>RepairDroneThinkTree</defName>
-        <insertTag>RimNet_DroneMain</insertTag>
+    <defName>CleaningDroneThinkTree</defName>
+    <insertTag>RimNet_DroneMain</insertTag>
     <thinkRoot Class="ThinkNode_Priority">
       <subNodes>
         <li Class="RimNet.ThinkNode_ConditionalCanDroneWork">
           <subNodes>
             <li Class="RimNet.JobGiver_TrydoWorkGiver">
-              <workDef>Repair</workDef>
+              <workDef>HaulGeneral</workDef>
+            </li>
+            <li Class="RimNet.JobGiver_TrydoWorkGiver">
+              <workDef>CleanFilth</workDef>
             </li>
             <li Class="RimNet.JobGiver_GotoController">
             </li>

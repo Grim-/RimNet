@@ -8,7 +8,7 @@ namespace RimNet
         protected override bool Satisfied(Pawn pawn)
         {
             var drone = pawn as Drone;
-            return drone?.controller != null && drone.Position.DistanceTo(drone.controller.parent.Position) <= 1f;
+            return drone?.Controller != null && drone.Position.DistanceTo(drone.Controller.parent.Position) <= 1f;
         }
     }
 }

@@ -11,6 +11,7 @@ namespace RimNet
 
         public static JobDef StoreSelfInController;
         public static JobDef InstallDrone;
+        public static JobDef PackUpDrone;
 
         public static ThingCategoryDef Drones;
     }

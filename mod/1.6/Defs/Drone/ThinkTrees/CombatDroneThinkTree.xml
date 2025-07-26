@@ -2,21 +2,17 @@
 <Defs>
   <ThinkTreeDef>
     <defName>CombatDroneThinkTree</defName>
+        <insertTag>RimNet_DroneMain</insertTag>
     <thinkRoot Class="ThinkNode_Priority">
       <subNodes>
-
-        <li Class="ThinkNode_ConditionalCanDoConstantThinkTreeJobNow">
+        <li Class="RimNet.ThinkNode_ConditionalCanDroneWork">
           <subNodes>
+            <li Class="JobGiver_AIFightEnemies">
+              <targetAcquireRadius>30</targetAcquireRadius>
+              <targetKeepRadius>35</targetKeepRadius>
+            </li>
 
-            <li Class="RimNet.ThinkNode_ConditionalIsDroneState">
-              <invert>true</invert>
-              <stateToCheck>RETURNING</stateToCheck>
-              <subNodes>
-                <li Class="JobGiver_AIFightEnemies">
-                  <targetAcquireRadius>30</targetAcquireRadius>
-                  <targetKeepRadius>35</targetKeepRadius>
-                </li>
-              </subNodes>
+            <li Class="RimNet.JobGiver_GotoController">
             </li>
           </subNodes>
         </li>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <RecipeDef ParentName="BaseDroneRecipe">
+    <defName>RimNet_BasicCleanDroneRecipe</defName>
+    <label>manufacture cleaning drone</label>
+    <description>Gestate a cleaning drone.</description>
+    <products>
+      <RimNet_BasicCleanDrone_Disassembled>1</RimNet_BasicCleanDrone_Disassembled>
+    </products>
+    <descriptionHyperlinks>
+      <ThingDef>RimNet_BasicCleanDrone_Disassembled</ThingDef>
+    </descriptionHyperlinks>
+  </RecipeDef>
+
+</Defs>

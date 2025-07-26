@@ -8,7 +8,7 @@ namespace RimNet
     {
         protected override bool Satisfied(Pawn pawn)
         {
-            if (!(pawn is Drone drone) || drone.controller == null || drone.Destroyed || !drone.Spawned)
+            if (!(pawn is Drone drone) || drone.Controller == null || drone.Destroyed || !drone.Spawned)
                 return false;
 
             return drone.ShouldReturn &&

@@ -10,7 +10,6 @@
               <li Class="JobGiver_Carried" />
             </subNodes>
           </li>
-
           <li Class="JobGiver_IdleWhileDespawned" />
         </subNodes>
       </thinkRoot>

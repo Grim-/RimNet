@@ -9,9 +9,9 @@ namespace RimNet
 
         protected override Job TryGiveJob(Pawn pawn)
         {
-            if (pawn is Drone drone && drone.controller != null)
+            if (pawn is Drone drone && drone.Controller != null)
             {
-                return JobMaker.MakeJob(storeJob, drone.controller.parent);
+                return JobMaker.MakeJob(storeJob, drone.Controller.parent);
             }
 
             return null;

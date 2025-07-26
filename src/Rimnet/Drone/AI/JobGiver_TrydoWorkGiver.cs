@@ -6,16 +6,19 @@ using Verse.AI;
 
 namespace RimNet
 {
-    public class JobGiver_FixBreakdownsDrone : ThinkNode_JobGiver
+
+    public class JobGiver_TrydoWorkGiver : ThinkNode_JobGiver
     {
+
+		public WorkGiverDef workDef;
+
         protected override Job TryGiveJob(Pawn pawn)
         {
-            var workGiver = WorkGiverDefOf.Repair;
 			IntVec3 cell = pawn.Position;
-			WorkGiver_Scanner scanner = workGiver.Worker as WorkGiver_Scanner;
+			WorkGiver_Scanner scanner = workDef.Worker as WorkGiver_Scanner;
 			if (scanner != null)
 			{
-				if (workGiver.scanThings)
+				if (workDef.scanThings)
 				{					
 					Predicate<Thing> predicate = (Thing t) => !t.IsForbidden(pawn) && scanner.HasJobOnThing(pawn, t, false);
                     foreach (var item in scanner.PotentialWorkThingsGlobal(pawn))
@@ -25,24 +28,24 @@ namespace RimNet
 							Job job2 = scanner.JobOnThing(pawn, item, false);
 							if (job2 != null)
 							{
-								job2.workGiverDef = workGiver;
+								job2.workGiverDef = workDef;
 							}
 							return job2;
 						}
 					}
 				}
-				if (workGiver.scanCells && !cell.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, cell, false))
+				if (workDef.scanCells && !cell.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, cell, false))
 				{
 					Job job3 = scanner.JobOnCell(pawn, cell, false);
 					if (job3 != null)
 					{
-						job3.workGiverDef = workGiver;
+						job3.workGiverDef = workDef;
 					}
 					return job3;
 				}			
 			}
 
-			return null;
+			return workDef.Worker.NonScanJob(pawn);
 		}
     }
 }

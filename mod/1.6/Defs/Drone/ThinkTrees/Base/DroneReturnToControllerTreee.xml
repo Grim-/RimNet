@@ -4,8 +4,7 @@
     <defName>DroneReturnToControllerTreee</defName>
     <thinkRoot Class="RimNet.ThinkNode_ConditionalShouldReturnToController">
       <subNodes>
-          <li Class="RimNet.JobGiver_StoreInController">
-            <storeJob>StoreSelfInController</storeJob>
+          <li Class="RimNet.JobGiver_GotoController">
           </li>
       </subNodes>
     </thinkRoot>

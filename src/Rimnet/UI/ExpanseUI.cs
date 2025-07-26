@@ -19,7 +19,7 @@ namespace RimNet
         //old
         public static readonly Color ExpanseBlue = new Color(0.1f, 0.3f, 0.6f, 1f);
         public static readonly Color ExpanseOrange = new Color(1f, 0.5f, 0.1f, 1f);
-        public static readonly Color ExpanseGreen = new Color(0, 0.839f, 0.039f, 1f);
+        public static readonly Color ExpanseGreen = new Color(0.298f, 0.678f, 0.318f, 1f);
         public static readonly Color ExpanseGray = new Color(0.2f, 0.25f, 0.3f, 1f);
         public static readonly Color ExpanseText = new Color(0.8f, 0.9f, 1f, 1f);
 
@@ -145,11 +145,12 @@ namespace RimNet
             GUI.color = originalColor;
         }
 
-        public static void DrawProgressBar(Rect rect, float fillPct, Color fillColor, Color bgColor = default, bool showPercentage = true)
+        public static void DrawProgressBar(Rect rect, float fillPct, Color fillColor, Color bgColor = default, bool showPercentage = true, TextAnchor textAnchor = TextAnchor.MiddleCenter, GameFont font = GameFont.Tiny)
         {
             Color originalColor = GUI.color;
 
-            if (bgColor == default) bgColor = DarkGray;
+            if (bgColor == default) 
+                bgColor = DarkGray;
 
             GUI.color = bgColor;
             GUI.DrawTexture(rect, BaseContent.WhiteTex);
@@ -170,10 +171,10 @@ namespace RimNet
             if (showPercentage)
             {
                 GUI.color = TextColor;
-                Text.Font = GameFont.Tiny;
-                Text.Anchor = TextAnchor.MiddleCenter;
+                Text.Font = font;
+                Text.Anchor = textAnchor;
                 string percentText = $"{fillPct * 100f:F0}%";
-                ExpanseUI.DrawFontLabel(rect, percentText, GameFont.Small);
+                ExpanseUI.DrawFontLabel(rect, percentText, GameFont.Small, TextAnchor.MiddleCenter);
                 Text.Anchor = TextAnchor.UpperLeft;
             }
 
@@ -230,11 +231,11 @@ namespace RimNet
         public static Color GetPercentageColor(float percentage)
         {
             if (percentage > 0.6f)
-                return Green;
+                return ExpanseGreen;
             else if (percentage > 0.3f)
-                return Orange;
+                return ExpanseOrange;
             else
-                return Red;
+                return Color.red;
         }
 
         public static void BeginExpanseStyle()

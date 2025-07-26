@@ -33,11 +33,11 @@
         <li Class="CompProperties_Power">
           <compClass>CompPowerTrader</compClass>
           <basePowerConsumption>100</basePowerConsumption>
-          <idlePowerDraw>0</idlePowerDraw>
+          <idlePowerDraw>300</idlePowerDraw>
           <alwaysDisplayAsUsingPower>true</alwaysDisplayAsUsingPower>
         </li>
+        <li Class="CompProperties_Flickable" />
         <li Class="RimNet.CompProperties_DroneController">
-          <droneDef>RimNet_BasicMiningDrone</droneDef>
         </li>
       </comps>
       <inspectorTabs>
@@ -49,10 +49,9 @@
         <destroySound>BuildingDestroyed_Metal_Small</destroySound>
       </building>
       <costList>
-        <Steel>150</Steel>
+        <Steel>450</Steel>
         <ComponentSpacer>4</ComponentSpacer>
         <Gold>70</Gold>
-        <AIPersonaCore>1</AIPersonaCore>
       </costList>
       <terrainAffordanceNeeded>Heavy</terrainAffordanceNeeded>
       <designationHotKey>Misc3</designationHotKey>

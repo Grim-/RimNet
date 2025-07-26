@@ -8,9 +8,9 @@ namespace RimNet
     {
         protected override Job TryGiveJob(Pawn pawn)
         {
-            if (pawn is Drone drone && drone.controller != null && drone.ShouldReturn)
+            if (pawn is Drone drone && drone.Controller != null && drone.ShouldReturn && drone.Controller.TryGetNearbyEmptyCell(out IntVec3 cell))
             {
-                Job job = JobMaker.MakeJob(JobDefOf.Goto, drone.controller.parent);
+                Job job = JobMaker.MakeJob(JobDefOf.Goto, cell);
                 return job;
             }
 

@@ -2,24 +2,20 @@
 <Defs>
   <ThinkTreeDef>
     <defName>MiningDroneThinkTree</defName>
+        <insertTag>RimNet_DroneMain</insertTag>
     <thinkRoot Class="ThinkNode_Priority">
       <subNodes>
-
-        <li Class="ThinkNode_ConditionalCanDoConstantThinkTreeJobNow">
+        <li Class="RimNet.ThinkNode_ConditionalCanDroneWork">
           <subNodes>
-
-            <li Class="RimNet.ThinkNode_ConditionalIsDroneState">
-              <invert>true</invert>
-              <stateToCheck>RETURNING</stateToCheck>
+            <li Class="ThinkNode_Tagger">
+              <tagToGive>Fieldwork</tagToGive>
               <subNodes>
-                <li Class="ThinkNode_Tagger">
-                  <tagToGive>Fieldwork</tagToGive>
-                  <subNodes>
-                    <li Class="JobGiver_Mine">
-                    </li>
-                  </subNodes>
+                <li Class="JobGiver_Mine">
                 </li>
               </subNodes>
+            </li>
+
+            <li Class="RimNet.JobGiver_GotoController">
             </li>
           </subNodes>
         </li>
